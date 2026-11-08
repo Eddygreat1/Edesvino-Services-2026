@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123b32">
+  <meta name="description" content="Edesvino Services connects customers with service professionals in Lagos, Nigeria.">
+  <title>Edesvino Services | Find Professionals in Lagos</title>
+
+  <style>
+    :root {
+      --green: #123b32;
+      --green2: #1d604d;
+      --gold: #f2b84b;
+      --ink: #17231f;
+      --muted: #64736c;
+      --cream: #f7f8f3;
+      --white: #fff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      background: var(--cream);
+      line-height: 1.6;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .wrap {
+      width: min(1120px, 92%);
+      margin: auto;
+    }
+
+    header {
+      background: var(--green);
+      color: white;
+      padding: 18px 0;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .brand {
+      font-size: 1.35rem;
+      font-weight: 800;
+    }
+
+    .brand span {
+      color: var(--gold);
+    }
+
+    .nav a.link {
+      font-weight: 700;
+      font-size: .95rem;
+    }
+
+    .hero {
+      background: linear-gradient(
+        120deg,
+        #123b32 0%,
+        #1d604d 72%,
+        #28735b 100%
+      );
+      color: white;
+      padding: 76px 0 82px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 35px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.6px;
+      font-size: .78rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      line-height: 1.08;
+      margin: 14px 0 18px;
+      max-width: 720px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      color: #e1eee8;
+      max-width: 620px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 13px 20px;
+      border-radius: 9px;
+      font-weight: 800;
+    }
+
+    .btn-gold {
+      background: var(--gold);
+      color: #1b2b24;
+    }
+
+    .btn-light {
+      border: 1px solid #d6e7df;
+      color: white;
+    }
+
+    .hero-card {
+      background: #ffffff12;
+      border: 1px solid #ffffff30;
+      border-radius: 18px;
+      padding: 25px;
+    }
+
+    .hero-card strong {
+      font-size: 1.1rem;
+    }
+
+    .hero-card p {
+      font-size: .96rem;
+      margin-bottom: 0;
+    }
+
+    .pin {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    section {
+      padding: 62px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 32px;
+    }
+
+    .section-title h2 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      line-height: 1.2;
+      margin: 0 0 10px;
+      color: var(--green);
+    }
+
+    .section-title p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 17px;
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e7ece7;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 5px 18px #153c2c08;
+    }
+
+    .icon {
+      font-size: 1.8rem;
+    }
+
+    .card h3 {
+      margin: 9px 0 5px;
+      color: var(--green);
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .step {
+      padding: 23px;
+      background: #edf3ed;
+      border-radius: 14px;
+    }
+
+    .number {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      background: var(--green);
+      color: white;
+      border-radius: 50%;
+      font-weight: 800;
+    }
+
+    .step h3 {
+      margin: 12px 0 5px;
+      color: var(--green);
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .provider {
+      background: #e9f0e9;
+    }
+
+    .provider-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .provider-box h2 {
+      margin: 0 0 8px;
+      color: var(--green);
+      font-size: 2rem;
+    }
+
+    .provider-box p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 650px;
+    }
+
+    footer {
+      background: #102e27;
+      color: #dce9e2;
+      padding: 25px 0;
+      text-align: center;
+      font-size: .9rem;
+    }
+
+    footer p {
+      margin: 4px;
+    }
+
+    @media(max-width: 760px) {
+      .hero {
+        padding: 58px 0;
+      }
+
+      .hero-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .grid,
+      .steps {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .provider-box {
+        display: block;
+      }
+
+      .provider-box .btn {
+        margin-top: 18px;
+      }
+    }
+
+    @media(max-width: 480px) {
+      .grid,
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .nav .link {
+        font-size: .85rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="index.html">
+        Edesvino <span>Services</span>
+      </a>
+
+      <a class="link" href="#how-it-works">
+        How it works
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <section class="hero">
+      <div class="wrap hero-grid">
+
+        <div>
+          <div class="eyebrow">
+            Launching in Lagos, Nigeria
+          </div>
+
+          <h1>
+            Find the right professional for the job.
+          </h1>
+
+          <p>
+            From repairs and cleaning to home improvement
+            and everyday services, Edesvino Services is being
+            built to connect customers with service professionals
+            in Lagos.
+          </p>
+
+          <div class="actions">
+            <a class="btn btn-gold" href="#services">
+              Explore services
+            </a>
+
+            <a class="btn btn-light" href="#become-a-provider">
+              Offer your services
+            </a>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <div class="pin">📍</div>
+
+          <strong>Starting in Lagos</strong>
+
+          <p>
+            We are building our first local network of
+            customers and independent service professionals,
+            one reliable connection at a time.
+          </p>
+        </aside>
+
+      </div>
+    </section>
+
+    <section id="services">
+      <div class="wrap">
+
+        <div class="section-title">
+          <h2>Services people need every day</h2>
+
+          <p>
+            These are the initial service categories we plan
+            to introduce. Availability will grow as professionals
+            join the platform.
+          </p>
+        </div>
+
+        <div class="grid">
+
+          <article class="card">
+            <div class="icon">🔧</div>
+            <h3>Plumbing</h3>
+            <p>
+              Help with leaks, fittings, blocked drains
+              and plumbing repairs.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">💡</div>
+            <h3>Electrical work</h3>
+            <p>
+              Find help for installations, electrical
+              faults and repairs.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🧹</div>
+            <h3>Cleaning</h3>
+            <p>
+              Home and office cleaning support
+              for different needs.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">❄️</div>
+            <h3>AC services</h3>
+            <p>
+              Air-conditioner installation,
+              servicing and maintenance.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🪚</div>
+            <h3>Carpentry</h3>
+            <p>
+              Furniture repairs, fittings
+              and general woodwork.
+            </p>
+          </article>
+
+          <article class="card">
+            <div class="icon">🚗</div>
+            <h3>Mechanic services</h3>
+            <p>
+              Vehicle checks, repairs and
+              maintenance assistance.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <section id="how-it-works">
+      <div class="wrap">
+
+        <div class="section-title">
+          <h2>How Edesvino Services will work</h2>
+
+          <p>
+            A straightforward process designed to help
+            customers and professionals connect.
+          </p>
+        </div>
+
+        <div class="steps">
+
+          <article class="step">
+            <span class="number">1</span>
+            <h3>Find a service</h3>
+            <p>
+              Customers choose the type of help they need
+              and share the job details.
+            </p>
+          </article>
+
+          <article class="step">
+            <span class="number">2</span>
+            <h3>Connect with a professional</h3>
+            <p>
+              Available professionals can review the request
+              and discuss the job with the customer.
+            </p>
+          </article>
+
+          <article class="step">
+            <span class="number">3</span>
+            <h3>Get the job done</h3>
+            <p>
+              The customer and professional agree on the work
+              and confirm when it is completed.
+            </p>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <section class="provider" id="become-a-provider">
+      <div class="wrap provider-box">
+
+        <div>
+          <h2>Are you a service professional in Lagos?</h2>
+
+          <p>
+            We are preparing to welcome skilled individuals
+            and service businesses to the Edesvino Services
+            network. Registration and onboarding details
+            will be published here.
+          </p>
+        </div>
+
+        <a class="btn btn-gold"
+           href="mailto:eddyspecial1978@gmail.com?subject=Edesvino%20Services%20Provider%20Enquiry">
+          Register your interest
+        </a>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <p>
+        <strong>Edesvino Services</strong> —
+        Find trusted professionals for any job.
+      </p>
+
+      <p>Launching in Lagos, Nigeria.</p>
+
+      <p>
+        &copy; 2026 Edesvino Services. All rights reserved.
+      </p>
+    </div>
+  </footer>
+
+</body>
+</html>
