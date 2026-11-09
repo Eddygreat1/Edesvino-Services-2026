@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browse Services | Edesvino Services</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    color: #222;
+}
+
+header {
+    background: #073b2a;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+nav {
+    background: white;
+    padding: 14px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+nav a {
+    color: #087443;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 10px;
+}
+
+.container {
+    max-width: 1100px;
+    margin: auto;
+    padding: 20px;
+}
+
+.intro {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.intro h2 {
+    color: #073b2a;
+}
+
+.search-box {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #073b2a;
+}
+
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.category-btn {
+    border: 1px solid #087443;
+    background: white;
+    color: #087443;
+    padding: 10px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.category-btn.active,
+.category-btn:hover {
+    background: #087443;
+    color: white;
+}
+
+.services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 18px;
+}
+
+.card {
+    background: white;
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card img {
+    width: 100%;
+    height: 170px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.card h4 {
+    color: #073b2a;
+    margin: 8px 0;
+    font-size: 19px;
+}
+
+.price {
+    color: #087443;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.provider {
+    color: #555;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.contact-btn {
+    display: inline-block;
+    background: #087443;
+    color: white;
+    padding: 11px 16px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.message {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 15px 0;
+    color: #555;
+}
+
+footer {
+    background: #073b2a;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Connecting customers with reliable service professionals.</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="provider-register.html">Become a Provider</a>
+    <a href="provider-dashboard.html">Provider Login</a>
+</nav>
+
+<div class="container">
+
+    <div class="intro">
+        <h2>Find the Right Professional</h2>
+        <p>Browse service categories and discover professionals offering services in your area.</p>
+    </div>
+
+    <input
+        type="search"
+        id="searchInput"
+        class="search-box"
+        placeholder="Search for a service, professional or location..."
+    >
+
+    <h3>Browse Service Categories</h3>
+
+    <div id="categories" class="categories">
+        <div class="message">Loading service categories...</div>
+    </div>
+
+    <h3>Available Services</h3>
+
+    <div id="serviceMessage" class="message">
+        Loading available services...
+    </div>
+
+    <div id="services" class="services"></div>
+
+</div>
+
+<footer>
+    <p>© 2026 Edesvino Services. All rights reserved.</p>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+let allServices = [];
+let selectedCategory = "all";
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function(char) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[char];
+    });
+}
+
+function formatPrice(price) {
+    if (price === null || price === undefined || price === "") {
+        return "Contact provider for price";
+    }
+
+    return "₦" + Number(price).toLocaleString("en-NG");
+}
+
+async function loadCategories() {
+    const box = document.getElementById("categories");
+
+    const { data, error } = await db
+        .from("service_categories")
+        .select("id,name")
+        .order("name");
+
+    if (error) {
+        box.innerHTML = '<div class="message">Unable to load categories. Please refresh.</div>';
+        return;
+    }
+
+    box.innerHTML = "";
+
+    const allButton = document.createElement("button");
+    allButton.className = "category-btn active";
+    allButton.textContent = "All Services";
+    allButton.onclick = function() {
+        filterCategory("all", allButton);
+    };
+
+    box.appendChild(allButton);
+
+    (data || []).forEach(category => {
+        const button = document.createElement("button");
+
+        button.className = "category-btn";
+        button.textContent = category.name;
+
+        button.onclick = function() {
+            filterCategory(String(category.id), button);
+        };
+
+        box.appendChild(button);
+    });
+}
+
+function filterCategory(categoryId, button) {
+    selectedCategory = categoryId;
+
+    document.querySelectorAll(".category-btn").forEach(btn => {
+        btn.classList.remove("active");
+    });
+
+    button.classList.add("active");
+
+    displayServices();
+}
+
+async function loadServices() {
+    const message = document.getElementById("serviceMessage");
+
+    message.textContent = "Loading available services...";
+
+    const { data, error } = await db
+        .from("services")
+        .select("id,provider_id,category_id,title,description,price,location,image_url,is_active,created_at")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        message.textContent = "Unable to load services. Please refresh the page.";
+        return;
+    }
+
+    const services = data || [];
+
+    if (services.length === 0) {
+        allServices = [];
+        message.style.display = "block";
+        message.textContent = "No services have been published yet. Approved professionals will appear here when they add their services.";
+        displayServices();
+        return;
+    }
+
+    const providerIds = [...new Set(
+        services.map(service => service.provider_id)
+    )];
+
+    const { data: providers, error: providerError } = await db
+        .from("service_providers")
+        .select("id,business_name,full_name,phone,location")
+        .in("id", providerIds);
+
+    if (providerError) {
+        message.textContent = "Unable to load provider information. Please try again.";
+        return;
+    }
+
+    const providerMap = {};
+
+    (providers || []).forEach(provider => {
+        providerMap[provider.id] = provider;
+    });
+
+    allServices = services.map(service => ({
+        ...service,
+        provider: providerMap[service.provider_id] || null
+    }));
+
+    message.style.display = "none";
+
+    displayServices();
+}
+
+function displayServices() {
+    const container = document.getElementById("services");
+    const message = document.getElementById("serviceMessage");
+    const search = document.getElementById("searchInput").value
+        .toLowerCase()
+        .trim();
+
+    container.innerHTML = "";
+
+    const filtered = allServices.filter(service => {
+        const provider = service.provider || {};
+
+        const matchesCategory =
+            selectedCategory === "all" ||
+            String(service.category_id) === selectedCategory;
+
+        const searchableText = [
+            service.title,
+            service.description,
+            service.location,
+            provider.business_name,
+            provider.full_name
+        ].join(" ").toLowerCase();
+
+        return matchesCategory && searchableText.includes(search);
+    });
+
+    if (filtered.length === 0) {
+        message.style.display = "block";
+
+        if (allServices.length === 0) {
+            message.textContent = "No services have been published yet. Approved professionals will appear here when they add their services.";
+        } else {
+            message.textContent = "No matching services found. Try another search or category.";
+        }
+
+        return;
+    }
+
+    message.style.display = "none";
+
+    filtered.forEach(service => {
+        const provider = service.provider || {};
+
+        const card = document.createElement("div");
+        card.className = "card";
+
+        let imageHTML = "";
+
+        if (service.image_url) {
+            imageHTML = `
+                <img
+                    src="${escapeHTML(service.image_url)}"
+                    alt="${escapeHTML(service.title)}"
+                    onerror="this.style.display='none'"
+                >
+            `;
+        }
+
+        let contactHTML = "";
+
+        if (provider.phone) {
+            const phone = String(provider.phone).replace(/[^0-9+]/g, "");
+
+            contactHTML = `
+                <a class="contact-btn"
+                   href="tel:${escapeHTML(phone)}">
+                   Contact Provider
+                </a>
+            `;
+        }
+
+        card.innerHTML = `
+            ${imageHTML}
+
+            <h4>${escapeHTML(service.title)}</h4>
+
+            <p>${escapeHTML(service.description || "No description provided.")}</p>
+
+            <p class="price">${formatPrice(service.price)}</p>
+
+            <div class="provider">
+                <strong>Provider:</strong>
+                ${escapeHTML(provider.business_name || provider.full_name || "Service Professional")}
+                <br>
+
+                <strong>Location:</strong>
+                ${escapeHTML(service.location || provider.location || "Location not specified")}
+            </div>
+
+            ${contactHTML}
+        `;
+
+        container.appendChild(card);
+    });
+}
+
+document.getElementById("searchInput").addEventListener(
+    "input",
+    displayServices
+);
+
+async function startPage() {
+    await loadCategories();
+    await loadServices();
+}
+
+startPage();
+</script>
+
+</body>
+</html>
