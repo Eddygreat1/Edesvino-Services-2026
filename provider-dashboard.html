@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provider Dashboard | Edesvino Services</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f7f4;color:#222}
+header{background:#087b45;color:white;text-align:center;padding:22px 15px}
+header a{color:white}
+main{max-width:850px;margin:22px auto;padding:0 14px}
+.card{background:white;padding:20px;border-radius:12px;margin-bottom:18px;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+h2{color:#087b45;margin-top:0}
+label{display:block;font-weight:bold;margin-top:14px}
+input,select,textarea{width:100%;padding:13px;margin-top:6px;border:1px solid #ccc;border-radius:7px;font-size:16px}
+button{padding:13px 16px;border:0;border-radius:7px;background:#087b45;color:white;font-size:15px;font-weight:bold;cursor:pointer;margin-top:15px}
+button:disabled{opacity:.6}
+.secondary{background:#52645a}
+.message{padding:12px;border-radius:7px;margin-top:12px;line-height:1.5;display:none}
+.ok{display:block;background:#e5f7eb;color:#126536}
+.bad{display:block;background:#ffe9e9;color:#a40000}
+.listing{border:1px solid #ddd;border-radius:8px;padding:14px;margin:12px 0}
+.muted{color:#666;line-height:1.5}
+.hidden{display:none}
+footer{text-align:center;padding:25px;color:#666}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>EDESVINO SERVICES</h1>
+<p>Service Provider Dashboard</p>
+<a href="index.html">← Back to Homepage</a>
+</header>
+
+<main>
+
+<section class="card" id="loginCard">
+<h2>Provider Sign In</h2>
+<p class="muted">Use the email address and password you used when registering as a service provider.</p>
+
+<form id="loginForm">
+<label>Email Address</label>
+<input id="email" type="email" autocomplete="username" required>
+
+<label>Password</label>
+<input id="password" type="password" autocomplete="current-password" required>
+
+<button id="loginButton" type="submit">Sign In</button>
+</form>
+
+<div id="loginMessage" class="message"></div>
+
+<p class="muted">
+Not registered yet?
+<a href="provider-register.html">Register as a service provider</a>.
+</p>
+</section>
+
+<section id="dashboard" class="hidden">
+
+<div class="card">
+<h2>Welcome to your provider dashboard</h2>
+<p id="providerDetails" class="muted"></p>
+<p id="approvalNotice" class="message"></p>
+<button type="button" class="secondary" id="logoutButton">Sign Out</button>
+</div>
+
+<div class="card hidden" id="listingCard">
+<h2>Add a Service</h2>
+
+<p class="muted">
+You can add more than one service and choose a different category for each listing.
+Only add services you genuinely provide.
+</p>
+
+<form id="serviceForm">
+
+<label>Service Category</label>
+<select id="category" required>
+<option value="">Loading categories...</option>
+</select>
+
+<label>Service Title</label>
+<input id="title" maxlength="120" placeholder="e.g. Generator servicing and repairs" required>
+
+<label>Service Description</label>
+<textarea id="description" rows="4" maxlength="1500" placeholder="Explain the work you provide and what customers should expect." required></textarea>
+
+<label>Price (₦)</label>
+<input id="price" type="number" min="0" step="0.01" placeholder="Enter your starting price" required>
+
+<label>Service Location</label>
+<input id="location" maxlength="120" placeholder="e.g. Ikeja, Lagos" required>
+
+<label>Service Image URL (optional)</label>
+<input id="imageUrl" type="url" placeholder="https://example.com/photo.jpg">
+
+<button id="saveButton" type="submit">Publish Service</button>
+
+</form>
+
+<div id="serviceMessage" class="message"></div>
+</div>
+
+<div class="card">
+<h2>Your Service Listings</h2>
+<p class="muted">Your listings will appear here when available.</p>
+<div id="myServices">Loading your listings...</div>
+</div>
+
+</section>
+</main>
+
+<footer>
+© 2026 Edesvino Services. All rights reserved.
+</footer>
+
+<script>
+
+const SUPABASE_URL = 'https://dhsfvctmvgmzrnpgxznd.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentProvider = null;
+
+function message(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = 'message ' + type;
+}
+
+function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+    }[c]));
+}
+
+async function loadCategories() {
+
+    const select = document.getElementById('category');
+
+    const {data, error} = await db
+        .from('service_categories')
+        .select('id,name')
+        .order('name');
+
+    if (error) {
+        select.innerHTML = '<option value="">Unable to load categories</option>';
+        throw error;
+    }
+
+    select.innerHTML =
+        '<option value="">Choose a category</option>' +
+        (data || []).map(c =>
+            '<option value="' + c.id + '">' +
+            escapeHtml(c.name) +
+            '</option>'
+        ).join('');
+}
+
+async function openDashboard(user) {
+
+    const {data: profile, error} = await db
+        .from('service_providers')
+        .select('id,full_name,business_name,phone,email,location,approval_status,primary_category')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (error) throw error;
+
+    if (!profile) {
+        throw new Error(
+            'We could not find a provider profile for this account. Please register first.'
+        );
+    }
+
+    currentProvider = profile;
+
+    document.getElementById('loginCard').classList.add('hidden');
+    document.getElementById('dashboard').classList.remove('hidden');
+
+    document.getElementById('providerDetails').textContent =
+        (profile.business_name || 'Service Provider') +
+        ' • ' +
+        (profile.full_name || '') +
+        ' • ' +
+        (profile.email || user.email);
+
+    if (profile.approval_status !== 'approved') {
+
+        const note = profile.approval_status === 'rejected'
+            ? 'Your application was not approved. Please contact Edesvino Services for assistance.'
+            : 'Your application is awaiting owner approval. You cannot publish services until your account is approved.';
+
+        message(
+            'approvalNotice',
+            note,
+            profile.approval_status === 'rejected' ? 'bad' : 'ok'
+        );
+
+        document.getElementById('listingCard').classList.add('hidden');
+
+    } else {
+
+        document.getElementById('approvalNotice').style.display = 'none';
+
+        document.getElementById('listingCard').classList.remove('hidden');
+
+        await loadCategories();
+    }
+
+    await loadMyServices();
+}
+
+async function loadMyServices() {
+
+    const area = document.getElementById('myServices');
+
+    area.textContent = 'Loading your listings...';
+
+    const {data, error} = await db
+        .from('services')
+        .select('id,title,description,price,location,is_active,category_id')
+        .eq('provider_id', currentProvider.id)
+        .order('id', {ascending: false});
+
+    if (error) {
+        area.textContent = 'Unable to load listings: ' + error.message;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        area.textContent = 'You have not added any services yet.';
+        return;
+    }
+
+    const cats = await db
+        .from('service_categories')
+        .select('id,name');
+
+    const names = {};
+
+    (cats.data || []).forEach(c => {
+        names[c.id] = c.name;
+    });
+
+    area.innerHTML = data.map(s => `
+        <div class="listing">
+            <strong>${escapeHtml(s.title)}</strong>
+            <p>${escapeHtml(names[s.category_id] || 'Service category')}</p>
+            <p>${escapeHtml(s.description)}</p>
+            <p><strong>Price:</strong> ₦${Number(s.price || 0).toLocaleString('en-NG')}</p>
+            <p><strong>Location:</strong> ${escapeHtml(s.location)}</p>
+            <p><strong>Listing:</strong> ${s.is_active ? 'Active' : 'Inactive'}</p>
+        </div>
+    `).join('');
+}
+
+// PROVIDER LOGIN
+
+document.getElementById('loginForm').addEventListener('submit', async e => {
+
+    e.preventDefault();
+
+    const button = document.getElementById('loginButton');
+
+    button.disabled = true;
+    button.textContent = 'Signing in...';
+
+    try {
+
+        const {data, error} = await db.auth.signInWithPassword({
+            email: document.getElementById('email').value.trim(),
+            password: document.getElementById('password').value
+        });
+
+        if (error) throw error;
+
+        await openDashboard(data.user);
+
+    } catch (err) {
+
+        message('loginMessage', err.message, 'bad');
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = 'Sign In';
+    }
+});
+
+// ADD SERVICE
+
+document.getElementById('serviceForm').addEventListener('submit', async e => {
+
+    e.preventDefault();
+
+    if (!currentProvider || currentProvider.approval_status !== 'approved') {
+        message(
+            'serviceMessage',
+            'Your provider account must be approved before publishing services.',
+            'bad'
+        );
+        return;
+    }
+
+    const button = document.getElementById('saveButton');
+
+    button.disabled = true;
+    button.textContent = 'Publishing...';
+
+    try {
+
+        const payload = {
+            provider_id: currentProvider.id,
+            category_id: Number(document.getElementById('category').value),
+            title: document.getElementById('title').value.trim(),
+            description: document.getElementById('description').value.trim(),
+            price: Number(document.getElementById('price').value),
+            location: document.getElementById('location').value.trim(),
+            image_url: document.getElementById('imageUrl').value.trim() || null,
+            is_active: true
+        };
+
+        if (
+            !payload.category_id ||
+            !payload.title ||
+            !payload.description ||
+            !payload.location ||
+            !Number.isFinite(payload.price) ||
+            payload.price < 0
+        ) {
+            throw new Error('Please complete all required fields with a valid price.');
+        }
+
+        const {error} = await db
+            .from('services')
+            .insert(payload);
+
+        if (error) throw error;
+
+        message(
+            'serviceMessage',
+            'Your service has been published successfully.',
+            'ok'
+        );
+
+        document.getElementById('serviceForm').reset();
+
+        await loadMyServices();
+
+    } catch (err) {
+
+        message('serviceMessage', err.message, 'bad');
+
+    } finally {
+
+        button.disabled = false;
+        button.textContent = 'Publish Service';
+    }
+});
+
+// SIGN OUT
+
+document.getElementById('logoutButton').addEventListener('click', async () => {
+
+    await db.auth.signOut();
+
+    currentProvider = null;
+
+    document.getElementById('dashboard').classList.add('hidden');
+    document.getElementById('loginCard').classList.remove('hidden');
+
+    document.getElementById('password').value = '';
+});
+
+// RESTORE SESSION
+
+(async () => {
+
+    const {data} = await db.auth.getSession();
+
+    if (data.session) {
+
+        try {
+
+            await openDashboard(data.session.user);
+
+        } catch (err) {
+
+            document.getElementById('loginCard').classList.remove('hidden');
+
+            message('loginMessage', err.message, 'bad');
+        }
+    }
+
+})();
+
+</script>
+
+</body>
+</html>
