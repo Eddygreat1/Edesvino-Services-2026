@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provider Bookings | Edesvino Services</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7f5;
+    color: #222;
+}
+
+header {
+    background: #087443;
+    color: white;
+    text-align: center;
+    padding: 22px 12px;
+}
+
+nav {
+    background: white;
+    padding: 14px;
+    text-align: center;
+}
+
+nav a {
+    color: #087443;
+    text-decoration: none;
+    margin: 7px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 850px;
+    margin: 25px auto;
+    padding: 18px;
+}
+
+.card {
+    background: white;
+    padding: 18px;
+    margin: 16px 0;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px #ddd;
+}
+
+.card h3 { color: #087443; }
+
+.status {
+    display: inline-block;
+    padding: 7px 12px;
+    background: #fff0c2;
+    color: #805900;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+button {
+    padding: 11px 15px;
+    margin: 7px 5px 0 0;
+    border: none;
+    border-radius: 6px;
+    background: #087443;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button.reject {
+    background: #b52b2b;
+}
+
+button:disabled {
+    background: #999;
+}
+
+.message {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Provider Booking Management</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="provider-dashboard.html">Provider Dashboard</a>
+    <a href="browse-services.html">Browse Services</a>
+</nav>
+
+<div class="container">
+
+    <h2>Customer Booking Requests</h2>
+
+    <p>View and manage bookings submitted for your services.</p>
+
+    <div id="message" class="message">
+        Checking provider account...
+    </div>
+
+    <div id="bookings"></div>
+
+    <button id="refreshButton"
+    onclick="loadBookings()" style="display:none;">
+        Refresh Bookings
+    </button>
+
+</div>
+
+<footer>
+    © 2026 Edesvino Services. All rights reserved.
+</footer>
+
+<script>
+
+const SUPABASE_URL =
+"https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const message = document.getElementById("message");
+const bookingsContainer = document.getElementById("bookings");
+const refreshButton = document.getElementById("refreshButton");
+
+let currentUser = null;
+
+function showMessage(text) {
+    message.textContent = text;
+    message.style.display = "block";
+}
+
+function hideMessage() {
+    message.style.display = "none";
+}
+
+function safeText(value) {
+    return String(value || "Not available")
+        .replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[character]);
+}
+
+function formatDate(value) {
+    if (!value) return "Not available";
+
+    return new Date(value).toLocaleString("en-NG", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+async function checkProvider() {
+
+    const { data: { session }, error } =
+        await db.auth.getSession();
+
+    if (error || !session) {
+        showMessage(
+            "Please sign in with your approved provider account."
+        );
+        return;
+    }
+
+    currentUser = session.user;
+
+    const { data: provider, error: providerError } =
+        await db
+        .from("service_providers")
+        .select("id,approval_status,business_name")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+    if (providerError || !provider) {
+
+        showMessage(
+            "This account does not have a registered service-provider profile."
+        );
+
+        return;
+    }
+
+    if (provider.approval_status !== "approved") {
+
+        showMessage(
+            "Your provider application is not yet approved. You can manage bookings after approval."
+        );
+
+        return;
+    }
+
+    refreshButton.style.display = "inline-block";
+
+    await loadBookings();
+}
+
+async function loadBookings() {
+
+    if (!currentUser) return;
+
+    bookingsContainer.innerHTML = "";
+
+    showMessage("Loading customer booking requests...");
+
+    const { data: bookings, error } = await db
+        .from("service_bookings")
+        .select("*")
+        .eq("provider_id", currentUser.id)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to load booking requests. Please try again."
+        );
+
+        return;
+    }
+
+    if (!bookings || bookings.length === 0) {
+
+        showMessage(
+            "You have no customer booking requests yet."
+        );
+
+        return;
+    }
+
+    const serviceIds = [...new Set(
+        bookings.map(item => item.service_id)
+    )];
+
+    const { data: services, error: serviceError } =
+        await db
+        .from("services")
+        .select("id,title,price")
+        .in("id", serviceIds);
+
+    if (serviceError) {
+        console.error(serviceError);
+    }
+
+    const serviceMap = {};
+
+    (services || []).forEach(service => {
+        serviceMap[service.id] = service;
+    });
+
+    hideMessage();
+
+    bookings.forEach(booking => {
+
+        const service = serviceMap[booking.service_id];
+
+        const status = String(
+            booking.booking_status || "pending"
+        ).toLowerCase();
+
+        const card = document.createElement("div");
+
+        card.className = "card";
+
+        let actionButtons = "";
+
+        if (status === "pending") {
+
+            actionButtons = `
+                <button onclick="updateBooking(
+                    ${booking.id}, 'accepted', this
+                )">
+                    Accept Booking
+                </button>
+
+                <button class="reject" onclick="updateBooking(
+                    ${booking.id}, 'rejected', this
+                )">
+                    Reject Booking
+                </button>
+            `;
+
+        } else if (status === "accepted") {
+
+            actionButtons = `
+                <button onclick="updateBooking(
+                    ${booking.id}, 'completed', this
+                )">
+                    Mark as Completed
+                </button>
+            `;
+        }
+
+        card.innerHTML = `
+
+            <h3>${safeText(
+                service ? service.title : "Service Booking"
+            )}</h3>
+
+            <p><strong>Customer:</strong>
+            ${safeText(booking.customer_name)}</p>
+
+            <p><strong>Phone:</strong>
+            ${safeText(booking.customer_phone)}</p>
+
+            <p><strong>Service Address:</strong>
+            ${safeText(booking.service_address)}</p>
+
+            <p><strong>Booking Date:</strong>
+            ${formatDate(booking.booking_date)}</p>
+
+            <p><strong>Service Price:</strong>
+            ${service
+                ? "₦" + Number(service.price).toLocaleString("en-NG")
+                : "Not available"}
+            </p>
+
+            <p><strong>Payment Status:</strong>
+            ${safeText(booking.payment_status)}</p>
+
+            <p><strong>Booking Status:</strong><br>
+            <span class="status">
+            ${safeText(status)}
+            </span></p>
+
+            <p><small>Request received:
+            ${formatDate(booking.created_at)}</small></p>
+
+            ${actionButtons}
+
+        `;
+
+        bookingsContainer.appendChild(card);
+    });
+}
+
+async function updateBooking(bookingId, newStatus, button) {
+
+    const confirmation = confirm(
+        "Are you sure you want to change this booking to " +
+        newStatus + "?"
+    );
+
+    if (!confirmation) return;
+
+    button.disabled = true;
+
+    const { error } = await db
+        .from("service_bookings")
+        .update({
+            booking_status: newStatus
+        })
+        .eq("id", bookingId)
+        .eq("provider_id", currentUser.id);
+
+    if (error) {
+
+        console.error(error);
+
+        button.disabled = false;
+
+        alert(
+            "Unable to update this booking. Please try again."
+        );
+
+        return;
+    }
+
+    alert("Booking status updated successfully.");
+
+    await loadBookings();
+}
+
+checkProvider();
+
+</script>
+
+</body>
+</html>
