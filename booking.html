@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book a Service | Edesvino Services</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7f5;
+    color: #222;
+}
+
+header {
+    background: #087443;
+    color: white;
+    padding: 22px 15px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+nav {
+    background: white;
+    padding: 14px;
+    text-align: center;
+}
+
+nav a {
+    color: #087443;
+    text-decoration: none;
+    margin: 7px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 650px;
+    margin: 25px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px #ddd;
+}
+
+h2 {
+    color: #087443;
+}
+
+label {
+    display: block;
+    margin-top: 16px;
+    font-weight: bold;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 13px;
+    margin-top: 7px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+button {
+    width: 100%;
+    padding: 14px;
+    margin-top: 22px;
+    background: #087443;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #999;
+}
+
+.message {
+    margin-top: 18px;
+    padding: 12px;
+    border-radius: 6px;
+    display: none;
+}
+
+.success {
+    background: #e2f7e9;
+    color: #12652f;
+}
+
+.error {
+    background: #ffe5e5;
+    color: #a00000;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Your account. Your services. Your convenience.</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="browse-services.html">Browse Services</a>
+    <a href="customer-account.html">Customer Account</a>
+</nav>
+
+<div class="container">
+
+    <h2>Book a Service</h2>
+
+    <p>Select a professional service and submit your booking request.</p>
+
+    <div id="accountMessage" class="message"></div>
+
+    <form id="bookingForm" style="display:none;">
+
+        <label>Select Service</label>
+        <select id="service" required>
+            <option value="">Loading available services...</option>
+        </select>
+
+        <label>Full Name</label>
+        <input type="text" id="customerName" required>
+
+        <label>Phone Number</label>
+        <input type="tel" id="customerPhone" required>
+
+        <label>Service Address</label>
+        <textarea id="serviceAddress" rows="3"
+        placeholder="Enter the address where the service is needed"
+        required></textarea>
+
+        <label>Preferred Booking Date and Time</label>
+        <input type="datetime-local" id="bookingDate" required>
+
+        <button type="submit" id="submitButton">
+            Submit Booking Request
+        </button>
+
+    </form>
+
+    <div id="resultMessage" class="message"></div>
+
+</div>
+
+<footer>
+    © 2026 Edesvino Services. All rights reserved.
+</footer>
+
+<script>
+const SUPABASE_URL = "https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const form = document.getElementById("bookingForm");
+const serviceSelect = document.getElementById("service");
+const accountMessage = document.getElementById("accountMessage");
+const resultMessage = document.getElementById("resultMessage");
+const submitButton = document.getElementById("submitButton");
+
+let currentUser = null;
+
+function showMessage(element, message, type) {
+    element.textContent = message;
+    element.className = "message " + type;
+    element.style.display = "block";
+}
+
+function localDateTime() {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    return now.toISOString().slice(0, 16);
+}
+
+document.getElementById("bookingDate").min = localDateTime();
+
+async function loadServices() {
+
+    serviceSelect.innerHTML =
+        '<option value="">Loading services...</option>';
+
+    const { data: services, error } = await db
+        .from("services")
+        .select("id,title,description,price,location,provider_id,category_id")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        serviceSelect.innerHTML =
+            '<option value="">Unable to load services</option>';
+
+        console.error(error);
+        return;
+    }
+
+    if (!services || services.length === 0) {
+        serviceSelect.innerHTML =
+            '<option value="">No services available yet</option>';
+
+        return;
+    }
+
+    const providerIds = [...new Set(
+        services.map(item => item.provider_id)
+    )];
+
+    const { data: providers, error: providerError } = await db
+        .from("service_providers")
+        .select("id,business_name")
+        .in("id", providerIds);
+
+    if (providerError) {
+        serviceSelect.innerHTML =
+            '<option value="">Unable to load providers</option>';
+
+        console.error(providerError);
+        return;
+    }
+
+    const providerMap = {};
+
+    (providers || []).forEach(provider => {
+        providerMap[provider.id] = provider.business_name;
+    });
+
+    serviceSelect.innerHTML =
+        '<option value="">Choose a service</option>';
+
+    services.forEach(item => {
+
+        const option = document.createElement("option");
+
+        option.value = item.id;
+        option.dataset.provider = item.provider_id;
+
+        const providerName =
+            providerMap[item.provider_id] || "Service Provider";
+
+        option.textContent =
+            item.title + " - ₦" +
+            Number(item.price).toLocaleString("en-NG") +
+            " - " + providerName +
+            (item.location ? " (" + item.location + ")" : "");
+
+        serviceSelect.appendChild(option);
+    });
+}
+
+async function checkCustomerAccount() {
+
+    const { data: { session }, error } =
+        await db.auth.getSession();
+
+    if (error || !session) {
+        showMessage(
+            accountMessage,
+            "Please sign in with your customer account before booking a service.",
+            "error"
+        );
+
+        return;
+    }
+
+    const user = session.user;
+
+    if (!user || user.user_metadata?.account_type !== "customer") {
+
+        await db.auth.signOut();
+
+        showMessage(
+            accountMessage,
+            "Customer access only. Please sign in with your customer account.",
+            "error"
+        );
+
+        return;
+    }
+
+    currentUser = user;
+
+    document.getElementById("customerName").value =
+        user.user_metadata.full_name || "";
+
+    document.getElementById("customerPhone").value =
+        user.user_metadata.phone || "";
+
+    accountMessage.style.display = "none";
+    form.style.display = "block";
+
+    await loadServices();
+}
+
+form.addEventListener("submit", async function(event) {
+
+    event.preventDefault();
+
+    if (!currentUser) {
+        showMessage(
+            resultMessage,
+            "Please sign in with your customer account.",
+            "error"
+        );
+        return;
+    }
+
+    const selectedOption = serviceSelect.selectedOptions[0];
+
+    if (!selectedOption || !selectedOption.value) {
+        showMessage(
+            resultMessage,
+            "Please select an available service.",
+            "error"
+        );
+        return;
+    }
+
+    const selectedDate =
+        document.getElementById("bookingDate").value;
+
+    if (!selectedDate || new Date(selectedDate) <= new Date()) {
+        showMessage(
+            resultMessage,
+            "Please select a future booking date and time.",
+            "error"
+        );
+        return;
+    }
+
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting Booking...";
+
+    const booking = {
+        customer_id: currentUser.id,
+        provider_id: selectedOption.dataset.provider,
+        service_id: Number(selectedOption.value),
+        customer_name:
+            document.getElementById("customerName").value.trim(),
+        customer_phone:
+            document.getElementById("customerPhone").value.trim(),
+        service_address:
+            document.getElementById("serviceAddress").value.trim(),
+        booking_date: new Date(selectedDate).toISOString(),
+        booking_status: "pending",
+        payment_status: "pending"
+    };
+
+    const { error } = await db
+        .from("service_bookings")
+        .insert(booking);
+
+    submitButton.disabled = false;
+    submitButton.textContent = "Submit Booking Request";
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            resultMessage,
+            "Booking could not be submitted. Please try again.",
+            "error"
+        );
+
+        return;
+    }
+
+    form.reset();
+
+    showMessage(
+        resultMessage,
+        "Your booking request has been submitted successfully. It is now pending confirmation.",
+        "success"
+    );
+
+    document.getElementById("customerName").value =
+        currentUser.user_metadata.full_name || "";
+
+    document.getElementById("customerPhone").value =
+        currentUser.user_metadata.phone || "";
+
+    document.getElementById("bookingDate").min = localDateTime();
+});
+
+checkCustomerAccount();
+</script>
+
+</body>
+</html>
