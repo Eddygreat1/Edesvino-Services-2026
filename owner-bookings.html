@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Owner Booking Management | Edesvino Services</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f4f7f5;
+    color: #222;
+}
+
+header {
+    background: #087443;
+    color: white;
+    text-align: center;
+    padding: 22px 12px;
+}
+
+nav {
+    background: white;
+    padding: 14px;
+    text-align: center;
+}
+
+nav a {
+    color: #087443;
+    text-decoration: none;
+    margin: 7px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.stat {
+    background: white;
+    padding: 18px;
+    border-radius: 8px;
+    box-shadow: 0 2px 7px #ddd;
+    text-align: center;
+}
+
+.stat h3 {
+    color: #087443;
+    font-size: 26px;
+    margin: 8px 0;
+}
+
+.card {
+    background: white;
+    padding: 18px;
+    margin: 15px 0;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px #ddd;
+    overflow-wrap: anywhere;
+}
+
+.card h3 {
+    color: #087443;
+}
+
+.status {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 20px;
+    background: #fff0c2;
+    color: #805900;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+button {
+    background: #087443;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:disabled {
+    background: #999;
+}
+
+.message {
+    background: white;
+    padding: 17px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.hidden {
+    display: none;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Owner Booking Management</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="owner-dashboard.html">Owner Dashboard</a>
+    <a href="browse-services.html">Browse Services</a>
+</nav>
+
+<div class="container">
+
+    <h2>Platform Booking Overview</h2>
+
+    <p>Monitor customer bookings across Edesvino Services.</p>
+
+    <button id="refreshButton" onclick="loadBookings()">
+        Refresh Bookings
+    </button>
+
+    <div id="message" class="message">
+        Checking owner access...
+    </div>
+
+    <div id="dashboard" class="hidden">
+
+        <div class="stats">
+
+            <div class="stat">
+                <p>Total Bookings</p>
+                <h3 id="total">0</h3>
+            </div>
+
+            <div class="stat">
+                <p>Pending</p>
+                <h3 id="pending">0</h3>
+            </div>
+
+            <div class="stat">
+                <p>Accepted</p>
+                <h3 id="accepted">0</h3>
+            </div>
+
+            <div class="stat">
+                <p>Completed</p>
+                <h3 id="completed">0</h3>
+            </div>
+
+            <div class="stat">
+                <p>Rejected</p>
+                <h3 id="rejected">0</h3>
+            </div>
+
+        </div>
+
+        <h2>All Customer Bookings</h2>
+
+        <div id="bookingList"></div>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Edesvino Services. All rights reserved.
+</footer>
+
+<script>
+
+const SUPABASE_URL =
+"https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+const message = document.getElementById("message");
+const dashboard = document.getElementById("dashboard");
+const bookingList = document.getElementById("bookingList");
+const refreshButton = document.getElementById("refreshButton");
+
+function showMessage(text) {
+    message.textContent = text;
+    message.style.display = "block";
+}
+
+function hideMessage() {
+    message.style.display = "none";
+}
+
+function safeText(value) {
+    return String(value ?? "Not available")
+        .replace(/[&<>"']/g, character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        })[character]);
+}
+
+function formatDate(value) {
+    if (!value) return "Not available";
+
+    return new Date(value).toLocaleString("en-NG", {
+        dateStyle: "medium",
+        timeStyle: "short"
+    });
+}
+
+function countStatus(bookings, status) {
+    return bookings.filter(item =>
+        String(item.booking_status || "").toLowerCase() === status
+    ).length;
+}
+
+async function checkOwner() {
+
+    const { data: { session }, error } =
+        await db.auth.getSession();
+
+    if (error || !session) {
+        showMessage(
+            "Please sign in through the Owner Dashboard first."
+        );
+        return;
+    }
+
+    await loadBookings();
+}
+
+async function loadBookings() {
+
+    refreshButton.disabled = true;
+    refreshButton.textContent = "Loading...";
+
+    showMessage("Loading platform bookings...");
+
+    dashboard.classList.add("hidden");
+
+    const { data, error } = await db.rpc(
+        "get_owner_service_bookings"
+    );
+
+    refreshButton.disabled = false;
+    refreshButton.textContent = "Refresh Bookings";
+
+    if (error) {
+
+        console.error(error);
+
+        showMessage(
+            "Unable to retrieve bookings. Please confirm that you are signed in with the authorized owner account."
+        );
+
+        return;
+    }
+
+    const bookings = data || [];
+
+    document.getElementById("total").textContent =
+        bookings.length;
+
+    document.getElementById("pending").textContent =
+        countStatus(bookings, "pending");
+
+    document.getElementById("accepted").textContent =
+        countStatus(bookings, "accepted");
+
+    document.getElementById("completed").textContent =
+        countStatus(bookings, "completed");
+
+    document.getElementById("rejected").textContent =
+        countStatus(bookings, "rejected");
+
+    bookingList.innerHTML = "";
+
+    if (bookings.length === 0) {
+
+        bookingList.innerHTML =
+            '<div class="card">No customer bookings have been submitted yet.</div>';
+
+    } else {
+
+        bookings.forEach(booking => {
+
+            const card = document.createElement("div");
+
+            card.className = "card";
+
+            card.innerHTML = `
+
+                <h3>${safeText(
+                    booking.service_title || "Service Booking"
+                )}</h3>
+
+                <p><strong>Booking ID:</strong>
+                ${safeText(booking.id)}</p>
+
+                <p><strong>Customer:</strong>
+                ${safeText(booking.customer_name)}</p>
+
+                <p><strong>Customer Phone:</strong>
+                ${safeText(booking.customer_phone)}</p>
+
+                <p><strong>Provider:</strong>
+                ${safeText(booking.provider_business_name)}</p>
+
+                <p><strong>Service Price:</strong>
+                ${booking.service_price === null
+                    ? "Not available"
+                    : "₦" + Number(
+                        booking.service_price
+                    ).toLocaleString("en-NG")}
+                </p>
+
+                <p><strong>Service Address:</strong>
+                ${safeText(booking.service_address)}</p>
+
+                <p><strong>Booking Date:</strong>
+                ${formatDate(booking.booking_date)}</p>
+
+                <p><strong>Booking Status:</strong><br>
+                <span class="status">
+                ${safeText(booking.booking_status)}
+                </span></p>
+
+                <p><strong>Payment Status:</strong>
+                ${safeText(booking.payment_status)}</p>
+
+                <p><small>Submitted:
+                ${formatDate(booking.created_at)}</small></p>
+
+            `;
+
+            bookingList.appendChild(card);
+        });
+    }
+
+    hideMessage();
+    dashboard.classList.remove("hidden");
+}
+
+checkOwner();
+
+</script>
+
+</body>
+</html>
