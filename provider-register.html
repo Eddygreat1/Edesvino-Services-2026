@@ -3,136 +3,42 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Become a Service Provider | Edesvino Services</title>
-
+<title>Provider Registration | Edesvino Services</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-    box-sizing: border-box;
-}
-
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f7f5;
-    color: #222;
-}
-
-header {
-    background: #087b45;
-    color: white;
-    padding: 20px;
-    text-align: center;
-}
-
-header a {
-    color: white;
-    text-decoration: none;
-}
-
-.container {
-    max-width: 600px;
-    margin: 30px auto;
-    padding: 25px;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 3px 15px rgba(0,0,0,.08);
-}
-
-h2 {
-    color: #087b45;
-    text-align: center;
-}
-
-p {
-    line-height: 1.6;
-}
-
-label {
-    display: block;
-    margin-top: 15px;
-    font-weight: bold;
-}
-
-input, select, textarea {
-    width: 100%;
-    padding: 13px;
-    margin-top: 7px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 15px;
-}
-
-button {
-    width: 100%;
-    padding: 15px;
-    margin-top: 20px;
-    background: #087b45;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-button:disabled {
-    opacity: .6;
-    cursor: wait;
-}
-
-.status {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 6px;
-    display: none;
-    line-height: 1.5;
-}
-
-.success {
-    display: block;
-    background: #e3f8eb;
-    color: #087b45;
-}
-
-.error {
-    display: block;
-    background: #ffe8e8;
-    color: #b00020;
-}
-
-.section {
-    margin-top: 35px;
-    border-top: 1px solid #ddd;
-    padding-top: 20px;
-}
-
-footer {
-    text-align: center;
-    padding: 25px;
-    color: #666;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f7f5;color:#222}
+header{background:#087b45;color:white;padding:20px;text-align:center}
+header a{color:white;text-decoration:none}
+.container{max-width:600px;margin:30px auto;padding:25px;background:white;border-radius:12px;box-shadow:0 3px 15px rgba(0,0,0,.08)}
+h2{color:#087b45;text-align:center}
+p{line-height:1.6}
+label{display:block;margin-top:15px;font-weight:bold}
+input,select,textarea{width:100%;padding:13px;margin-top:7px;border:1px solid #ccc;border-radius:6px;font-size:15px}
+button{width:100%;padding:15px;margin-top:20px;background:#087b45;color:white;border:0;border-radius:7px;font-size:16px;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.6}
+.secondary{background:#eef5f0;color:#087b45;border:1px solid #087b45}
+.status{margin-top:15px;padding:12px;border-radius:6px;display:none;line-height:1.5}
+.success{display:block;background:#e3f8eb;color:#087b45}
+.error{display:block;background:#ffe8e8;color:#b00020}
+.section{margin-top:35px;border-top:1px solid #ddd;padding-top:20px}
+footer{text-align:center;padding:25px;color:#666}
 </style>
 </head>
 
 <body>
 
 <header>
-    <h1>EDESVINO SERVICES</h1>
-    <p>Join our growing network of service professionals.</p>
-    <a href="index.html">← Back to Homepage</a>
+<h1>EDESVINO SERVICES</h1>
+<p>Join our growing network of service professionals.</p>
+<a href="index.html">← Back to Homepage</a>
 </header>
 
 <div class="container">
 
 <h2>Become a Service Provider</h2>
-
-<p>
-Register your business and connect with customers looking
-for reliable professionals in Lagos.
-</p>
+<p>Register your business and connect with customers looking for reliable professionals in Lagos.</p>
 
 <form id="registerForm">
 
@@ -174,10 +80,7 @@ for reliable professionals in Lagos.
 <label>Describe Your Services</label>
 <textarea id="description" rows="4" required></textarea>
 
-<button type="submit" id="registerButton">
-Submit Registration
-</button>
-
+<button type="submit" id="registerButton">Submit Registration</button>
 </form>
 
 <div id="registerStatus" class="status"></div>
@@ -185,7 +88,6 @@ Submit Registration
 <div class="section">
 
 <h2>Already Registered?</h2>
-
 <p>Sign in to complete or check your provider registration.</p>
 
 <form id="loginForm">
@@ -196,237 +98,306 @@ Submit Registration
 <label>Password</label>
 <input id="loginPassword" type="password" required>
 
-<button type="submit" id="loginButton">
-Sign In
-</button>
+<button type="submit" id="loginButton">Sign In</button>
+
+<button type="button" id="forgotButton" class="secondary">Forgot Password?</button>
 
 </form>
 
 <div id="loginStatus" class="status"></div>
 
-</div>
+<div id="recoverySection" class="section" style="display:none">
+
+<h2>Choose a New Password</h2>
+<p>Enter your new password below.</p>
+
+<form id="recoveryForm">
+<label>New Password</label>
+<input id="newPassword" type="password" minlength="8" required>
+<button type="submit" id="recoveryButton">Save New Password</button>
+</form>
+
+<div id="recoveryStatus" class="status"></div>
 
 </div>
+</div>
+</div>
 
-<footer>
-© 2026 Edesvino Services. All rights reserved.
-</footer>
+<footer>© 2026 Edesvino Services. All rights reserved.</footer>
 
 <script>
-const SUPABASE_URL =
-'https://dhsfvctmvgmzrnpgxznd.supabase.co';
 
-const SUPABASE_KEY =
-'sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm';
+const SUPABASE_URL = 'https://dhsfvctmvgmzrnpgxznd.supabase.co';
 
-const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
+const SUPABASE_KEY = 'sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm';
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+function showMessage(id,message,type){
+const box=document.getElementById(id);
+box.textContent=message;
+box.className='status '+type;
+}
+
+async function createProviderProfile(user){
+
+const data=user.user_metadata||{};
+
+if(data.account_type!=='service_provider'){
+throw new Error('This account is not registered as a service provider.');
+}
+
+const {data:existing,error:lookupError}=await db
+.from('service_providers')
+.select('id')
+.eq('id',user.id)
+.maybeSingle();
+
+if(lookupError)throw lookupError;
+
+if(existing){
+return 'Your provider profile already exists. It is awaiting approval if still pending.';
+}
+
+const {error}=await db.from('service_providers').insert({
+id:user.id,
+full_name:data.full_name,
+business_name:data.business_name,
+phone:data.phone,
+email:user.email,
+location:data.location,
+description:data.description,
+primary_category:data.primary_category,
+approval_status:'pending'
+});
+
+if(error)throw error;
+
+return 'Your provider profile has been created successfully. It is awaiting owner approval.';
+}
+
+
+// REGISTRATION
+
+document.getElementById('registerForm').addEventListener('submit',async function(e){
+
+e.preventDefault();
+
+const button=document.getElementById('registerButton');
+button.disabled=true;
+button.textContent='Submitting...';
+
+try{
+
+const fullName=document.getElementById('fullName').value.trim();
+const businessName=document.getElementById('businessName').value.trim();
+const phone=document.getElementById('phone').value.trim();
+const email=document.getElementById('email').value.trim();
+const password=document.getElementById('password').value;
+const category=document.getElementById('category').value;
+const location=document.getElementById('location').value.trim();
+const experience=document.getElementById('experience').value;
+const description=document.getElementById('description').value.trim();
+
+const {data,error}=await db.auth.signUp({
+
+email:email,
+password:password,
+
+options:{
+emailRedirectTo:window.location.origin+window.location.pathname,
+
+data:{
+account_type:'service_provider',
+full_name:fullName,
+business_name:businessName,
+phone:phone,
+location:location,
+primary_category:category,
+experience:experience,
+description:description
+}
+}
+
+});
+
+if(error)throw error;
+
+if(data.session){
+
+const message=await createProviderProfile(data.user);
+showMessage('registerStatus',message,'success');
+
+}else{
+
+showMessage(
+'registerStatus',
+'Registration started! Check your email and confirm your address. Then return here and sign in to complete your provider profile.',
+'success'
 );
 
-function showMessage(id, message, type) {
-    const box = document.getElementById(id);
-    box.textContent = message;
-    box.className = 'status ' + type;
 }
 
-async function createProviderProfile(user) {
+this.reset();
 
-    const data = user.user_metadata || {};
+}catch(error){
 
-    if (data.account_type !== 'service_provider') {
-        throw new Error('This account is not registered as a service provider.');
-    }
+showMessage('registerStatus',error.message,'error');
 
-    const { data: existing, error: lookupError } =
-        await db
-        .from('service_providers')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle();
+}finally{
 
-    if (lookupError) throw lookupError;
+button.disabled=false;
+button.textContent='Submit Registration';
 
-    if (existing) {
-        return 'Your provider profile already exists.';
-    }
-
-    const { error } = await db
-        .from('service_providers')
-        .insert({
-            id: user.id,
-            full_name: data.full_name,
-            business_name: data.business_name,
-            phone: data.phone,
-            email: user.email,
-            location: data.location,
-            description: data.description,
-            primary_category: data.primary_category,
-            approval_status: 'pending'
-        });
-
-    if (error) throw error;
-
-    return 'Your provider application has been submitted successfully. It is awaiting owner approval.';
 }
-
-
-// PROVIDER REGISTRATION
-
-document.getElementById('registerForm')
-.addEventListener('submit', async function(e) {
-
-    e.preventDefault();
-
-    const button = document.getElementById('registerButton');
-    button.disabled = true;
-    button.textContent = 'Submitting...';
-
-    try {
-
-        const fullName =
-            document.getElementById('fullName').value.trim();
-
-        const businessName =
-            document.getElementById('businessName').value.trim();
-
-        const phone =
-            document.getElementById('phone').value.trim();
-
-        const email =
-            document.getElementById('email').value.trim();
-
-        const password =
-            document.getElementById('password').value;
-
-        const category =
-            document.getElementById('category').value;
-
-        const location =
-            document.getElementById('location').value.trim();
-
-        const experience =
-            document.getElementById('experience').value;
-
-        const description =
-            document.getElementById('description').value.trim();
-
-        const { data, error } = await db.auth.signUp({
-
-            email: email,
-            password: password,
-
-            options: {
-                emailRedirectTo: window.location.href,
-
-                data: {
-                    account_type: 'service_provider',
-                    full_name: fullName,
-                    business_name: businessName,
-                    phone: phone,
-                    location: location,
-                    primary_category: category,
-                    experience: experience,
-                    description: description
-                }
-            }
-        });
-
-        if (error) throw error;
-
-        if (data.session) {
-
-            const message =
-                await createProviderProfile(data.user);
-
-            showMessage(
-                'registerStatus',
-                message,
-                'success'
-            );
-
-        } else {
-
-            showMessage(
-                'registerStatus',
-                'Registration started! Please check your email and confirm your address. Then return here and sign in to complete your provider profile.',
-                'success'
-            );
-
-        }
-
-        this.reset();
-
-    } catch(error) {
-
-        showMessage(
-            'registerStatus',
-            error.message,
-            'error'
-        );
-
-    } finally {
-
-        button.disabled = false;
-        button.textContent = 'Submit Registration';
-
-    }
 
 });
 
 
-// PROVIDER LOGIN
+// LOGIN
 
-document.getElementById('loginForm')
-.addEventListener('submit', async function(e) {
+document.getElementById('loginForm').addEventListener('submit',async function(e){
 
-    e.preventDefault();
+e.preventDefault();
 
-    const button = document.getElementById('loginButton');
+const button=document.getElementById('loginButton');
+button.disabled=true;
+button.textContent='Signing in...';
 
-    button.disabled = true;
-    button.textContent = 'Signing in...';
+try{
 
-    try {
+const email=document.getElementById('loginEmail').value.trim();
+const password=document.getElementById('loginPassword').value;
 
-        const email =
-            document.getElementById('loginEmail').value.trim();
+const {data,error}=await db.auth.signInWithPassword({
+email:email,
+password:password
+});
 
-        const password =
-            document.getElementById('loginPassword').value;
+if(error)throw error;
 
-        const { data, error } = await db.auth.signInWithPassword({
+const message=await createProviderProfile(data.user);
 
-            email: email,
-            password: password
+showMessage('loginStatus',message,'success');
 
-        });
+}catch(error){
 
-        if (error) throw error;
+showMessage('loginStatus',error.message,'error');
 
-        const message =
-            await createProviderProfile(data.user);
+}finally{
 
-        showMessage(
-            'loginStatus',
-            message,
-            'success'
-        );
+button.disabled=false;
+button.textContent='Sign In';
 
-    } catch(error) {
+}
 
-        showMessage(
-            'loginStatus',
-            error.message,
-            'error'
-        );
+});
 
-    } finally {
 
-        button.disabled = false;
-        button.textContent = 'Sign In';
+// FORGOT PASSWORD
 
-    }
+document.getElementById('forgotButton').addEventListener('click',async function(){
+
+const email=document.getElementById('loginEmail').value.trim();
+
+if(!email){
+showMessage('loginStatus','Enter your registered email address above first.','error');
+return;
+}
+
+const button=document.getElementById('forgotButton');
+button.disabled=true;
+button.textContent='Sending email...';
+
+try{
+
+const {error}=await db.auth.resetPasswordForEmail(email,{
+redirectTo:window.location.origin+window.location.pathname
+});
+
+if(error)throw error;
+
+showMessage(
+'loginStatus',
+'Password reset email sent. Check your inbox and tap the reset link.',
+'success'
+);
+
+}catch(error){
+
+showMessage('loginStatus',error.message,'error');
+
+}finally{
+
+button.disabled=false;
+button.textContent='Forgot Password?';
+
+}
+
+});
+
+
+// DETECT PASSWORD RESET
+
+db.auth.onAuthStateChange((event)=>{
+
+if(event==='PASSWORD_RECOVERY'){
+
+document.getElementById('recoverySection').style.display='block';
+
+document.getElementById('recoverySection').scrollIntoView({
+behavior:'smooth'
+});
+
+showMessage(
+'recoveryStatus',
+'Reset link verified. Enter your new password below.',
+'success'
+);
+
+}
+
+});
+
+
+// SAVE NEW PASSWORD
+
+document.getElementById('recoveryForm').addEventListener('submit',async function(e){
+
+e.preventDefault();
+
+const button=document.getElementById('recoveryButton');
+const password=document.getElementById('newPassword').value;
+
+button.disabled=true;
+button.textContent='Saving...';
+
+try{
+
+const {error}=await db.auth.updateUser({
+password:password
+});
+
+if(error)throw error;
+
+showMessage(
+'recoveryStatus',
+'Your password has been changed successfully. You can now sign in with your new password.',
+'success'
+);
+
+this.reset();
+
+}catch(error){
+
+showMessage('recoveryStatus',error.message,'error');
+
+}finally{
+
+button.disabled=false;
+button.textContent='Save New Password';
+
+}
 
 });
 
