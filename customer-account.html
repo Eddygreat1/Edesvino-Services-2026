@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Account | Edesvino Services</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f7fa;
+    color: #222;
+}
+
+header {
+    background: #073b2a;
+    color: white;
+    text-align: center;
+    padding: 22px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+nav {
+    background: white;
+    padding: 14px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+nav a {
+    color: #087443;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 9px;
+}
+
+.container {
+    max-width: 480px;
+    margin: 35px auto;
+    padding: 20px;
+}
+
+.panel {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+h2 {
+    color: #073b2a;
+    text-align: center;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.tabs button {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #087443;
+    background: white;
+    color: #087443;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.tabs button.active {
+    background: #087443;
+    color: white;
+}
+
+label {
+    display: block;
+    margin: 13px 0 6px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.main-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 6px;
+    background: #087443;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.main-btn:disabled {
+    opacity: 0.6;
+}
+
+.message {
+    display: none;
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 6px;
+    line-height: 1.5;
+}
+
+.success {
+    display: block;
+    background: #e5f7ec;
+    color: #176b35;
+}
+
+.error {
+    display: block;
+    background: #fdeaea;
+    color: #a12626;
+}
+
+.account-box {
+    display: none;
+    text-align: center;
+}
+
+.account-box p {
+    line-height: 1.7;
+}
+
+.small-text {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+footer {
+    background: #073b2a;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Your account. Your services. Your convenience.</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="browse-services.html">Browse Services</a>
+    <a href="provider-register.html">Become a Provider</a>
+</nav>
+
+<div class="container">
+
+    <div class="panel">
+
+        <div id="accountForms">
+
+            <h2>Customer Account</h2>
+
+            <p style="text-align:center;">
+                Create an account or sign in to Edesvino Services.
+            </p>
+
+            <div class="tabs">
+                <button id="registerTab" class="active" onclick="showForm('register')">
+                    Register
+                </button>
+
+                <button id="loginTab" onclick="showForm('login')">
+                    Login
+                </button>
+            </div>
+
+            <form id="registerForm">
+
+                <label for="fullName">Full Name</label>
+                <input
+                    type="text"
+                    id="fullName"
+                    placeholder="Enter your full name"
+                    required
+                >
+
+                <label for="phone">Phone Number</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    placeholder="Enter your phone number"
+                    required
+                >
+
+                <label for="registerEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="registerEmail"
+                    placeholder="Enter your email"
+                    required
+                >
+
+                <label for="registerPassword">Password</label>
+                <input
+                    type="password"
+                    id="registerPassword"
+                    placeholder="Create a password (at least 6 characters)"
+                    minlength="6"
+                    required
+                >
+
+                <button type="submit" class="main-btn" id="registerButton">
+                    Create Customer Account
+                </button>
+
+            </form>
+
+            <form id="loginForm" style="display:none;">
+
+                <label for="loginEmail">Email Address</label>
+                <input
+                    type="email"
+                    id="loginEmail"
+                    placeholder="Enter your email"
+                    required
+                >
+
+                <label for="loginPassword">Password</label>
+                <input
+                    type="password"
+                    id="loginPassword"
+                    placeholder="Enter your password"
+                    required
+                >
+
+                <button type="submit" class="main-btn" id="loginButton">
+                    Login to Your Account
+                </button>
+
+            </form>
+
+            <div id="message" class="message"></div>
+
+            <p class="small-text">
+                Your account details will be used to help manage your service bookings.
+            </p>
+
+        </div>
+
+        <div id="accountBox" class="account-box">
+
+            <h2>Welcome to Edesvino Services!</h2>
+
+            <p>You are successfully signed in.</p>
+
+            <p>
+                <strong>Email:</strong><br>
+                <span id="accountEmail"></span>
+            </p>
+
+            <a href="browse-services.html" class="main-btn" style="display:block;text-decoration:none;">
+                Browse Services
+            </a>
+
+            <button class="main-btn" onclick="signOut()" style="background:#a12626;">
+                Sign Out
+            </button>
+
+            <div id="accountMessage" class="message"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    <p>© 2026 Edesvino Services. All rights reserved.</p>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+function showMessage(text, type) {
+    const box = document.getElementById("message");
+    box.textContent = text;
+    box.className = "message " + type;
+}
+
+function showAccountMessage(text, type) {
+    const box = document.getElementById("accountMessage");
+    box.textContent = text;
+    box.className = "message " + type;
+}
+
+function showForm(form) {
+    document.getElementById("registerForm").style.display =
+        form === "register" ? "block" : "none";
+
+    document.getElementById("loginForm").style.display =
+        form === "login" ? "block" : "none";
+
+    document.getElementById("registerTab").classList.toggle(
+        "active", form === "register"
+    );
+
+    document.getElementById("loginTab").classList.toggle(
+        "active", form === "login"
+    );
+
+    document.getElementById("message").className = "message";
+}
+
+function displayAccount(user) {
+    document.getElementById("accountForms").style.display = "none";
+    document.getElementById("accountBox").style.display = "block";
+    document.getElementById("accountEmail").textContent = user.email || "";
+}
+
+function displayForms() {
+    document.getElementById("accountForms").style.display = "block";
+    document.getElementById("accountBox").style.display = "none";
+}
+
+document.getElementById("registerForm").addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("registerButton");
+
+        const fullName = document.getElementById("fullName").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const email = document.getElementById("registerEmail").value.trim();
+        const password = document.getElementById("registerPassword").value;
+
+        if (password.length < 6) {
+            showMessage("Your password must contain at least 6 characters.", "error");
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = "Creating Account...";
+
+        const { data, error } = await db.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    full_name: fullName,
+                    phone: phone,
+                    account_type: "customer"
+                }
+            }
+        });
+
+        button.disabled = false;
+        button.textContent = "Create Customer Account";
+
+        if (error) {
+            showMessage(error.message, "error");
+            return;
+        }
+
+        if (data.session && data.user) {
+            displayAccount(data.user);
+            showAccountMessage("Your customer account has been created successfully.", "success");
+        } else {
+            showMessage(
+                "Registration successful! Please check your email for the confirmation link. After confirming your email, return here and log in.",
+                "success"
+            );
+        }
+
+    }
+);
+
+document.getElementById("loginForm").addEventListener(
+    "submit",
+    async function(event) {
+
+        event.preventDefault();
+
+        const button = document.getElementById("loginButton");
+
+        const email = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+
+        button.disabled = true;
+        button.textContent = "Signing In...";
+
+        const { data, error } = await db.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        button.disabled = false;
+        button.textContent = "Login to Your Account";
+
+        if (error) {
+            showMessage(error.message, "error");
+            return;
+        }
+
+        displayAccount(data.user);
+
+    }
+);
+
+async function signOut() {
+
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+        showAccountMessage(error.message, "error");
+        return;
+    }
+
+    displayForms();
+    showForm("login");
+    showMessage("You have signed out successfully.", "success");
+
+}
+
+async function checkSession() {
+
+    const { data, error } = await db.auth.getSession();
+
+    if (error) {
+        displayForms();
+        return;
+    }
+
+    if (data.session && data.session.user) {
+        displayAccount(data.session.user);
+    } else {
+        displayForms();
+    }
+
+}
+
+db.auth.onAuthStateChange((event, session) => {
+
+    if (session && session.user) {
+        displayAccount(session.user);
+    } else if (event === "SIGNED_OUT") {
+        displayForms();
+    }
+
+});
+
+checkSession();
+</script>
+
+</body>
+</html>
