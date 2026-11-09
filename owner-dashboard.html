@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edesvino Services - Owner Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f3f5f7;
+    color: #222;
+}
+
+header {
+    background: #123d32;
+    color: white;
+    padding: 22px 16px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0 0 8px;
+}
+
+.container {
+    max-width: 950px;
+    margin: 25px auto;
+    padding: 15px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+input {
+    width: 100%;
+    padding: 13px;
+    margin: 9px 0;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 16px;
+}
+
+button {
+    padding: 11px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 5px 3px;
+}
+
+.primary {
+    background: #123d32;
+    color: white;
+}
+
+.approve {
+    background: #168447;
+    color: white;
+}
+
+.reject {
+    background: #c93636;
+    color: white;
+}
+
+.pending {
+    background: #e5a326;
+    color: #222;
+}
+
+.provider {
+    border: 1px solid #ddd;
+    border-radius: 9px;
+    padding: 17px;
+    margin: 15px 0;
+    background: #fff;
+}
+
+.provider h3 {
+    margin-top: 0;
+    color: #123d32;
+}
+
+.status {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 5px;
+    background: #eee;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.hidden {
+    display: none;
+}
+
+#message {
+    margin: 12px 0;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.small {
+    color: #666;
+    font-size: 13px;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>EDESVINO SERVICES</h1>
+    <p>Owner Approval Dashboard</p>
+</header>
+
+<div class="container">
+
+    <div class="card" id="loginBox">
+        <h2>Owner Login</h2>
+        <p>Sign in with your registered owner account.</p>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Owner email address"
+            autocomplete="username"
+        >
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
+
+        <button class="primary" onclick="ownerLogin()">
+            Sign In
+        </button>
+
+        <div id="loginMessage"></div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+
+        <div class="card">
+            <h2>Welcome, Edesvino Owner</h2>
+            <p id="ownerEmail"></p>
+
+            <button class="primary" onclick="loadProviders()">
+                Refresh Applications
+            </button>
+
+            <button class="reject" onclick="ownerLogout()">
+                Sign Out
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Provider Applications</h2>
+            <p>Review and manage service-provider registrations.</p>
+
+            <div id="summary"></div>
+            <div id="message"></div>
+            <div id="providers">
+                Loading applications...
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<footer>
+    © 2026 Edesvino Services. All rights reserved.
+</footer>
+
+<script>
+const SUPABASE_URL =
+"https://dhsfvctmvgmzrnpgxznd.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const OWNER_EMAIL = "eddyspecial1978@gmail.com";
+
+const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+function safe(value) {
+    return String(value ?? "").replace(/[&<>"']/g, function(char) {
+        return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[char];
+    });
+}
+
+function showMessage(message, error = false) {
+    const box = document.getElementById("message");
+    box.textContent = message;
+    box.style.color = error ? "#c93636" : "#168447";
+}
+
+async function checkOwner(user) {
+    if (!user || user.email !== OWNER_EMAIL) {
+        return false;
+    }
+
+    const { data, error } = await db
+        .from("platform_admins")
+        .select("user_id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (error || !data) {
+        return false;
+    }
+
+    return true;
+}
+
+async function ownerLogin() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    const message = document.getElementById("loginMessage");
+
+    message.textContent = "Signing in...";
+
+    if (!email || !password) {
+        message.textContent = "Enter your email and password.";
+        return;
+    }
+
+    const { data, error } = await db.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        message.textContent = error.message;
+        return;
+    }
+
+    const authorized = await checkOwner(data.user);
+
+    if (!authorized) {
+        await db.auth.signOut();
+        message.textContent =
+            "Access denied. This account is not registered as the owner.";
+        return;
+    }
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    document.getElementById("ownerEmail").textContent =
+        "Signed in as: " + data.user.email;
+
+    await loadProviders();
+}
+
+async function loadProviders() {
+    const area = document.getElementById("providers");
+
+    area.textContent = "Loading applications...";
+    showMessage("");
+
+    const { data: authData } = await db.auth.getUser();
+
+    if (!authData.user || !(await checkOwner(authData.user))) {
+        area.textContent = "Owner authorization required.";
+        return;
+    }
+
+    const { data, error } = await db
+        .from("service_providers")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+    if (error) {
+        area.textContent = "Unable to load applications: " + error.message;
+        return;
+    }
+
+    const providers = data || [];
+
+    const pending = providers.filter(
+        p => p.approval_status === "pending"
+    ).length;
+
+    const approved = providers.filter(
+        p => p.approval_status === "approved"
+    ).length;
+
+    const rejected = providers.filter(
+        p => p.approval_status === "rejected"
+    ).length;
+
+    document.getElementById("summary").innerHTML =
+        "<p><strong>Total:</strong> " + providers.length +
+        " | <strong>Pending:</strong> " + pending +
+        " | <strong>Approved:</strong> " + approved +
+        " | <strong>Rejected:</strong> " + rejected + "</p>";
+
+    if (providers.length === 0) {
+        area.textContent = "No provider applications found.";
+        return;
+    }
+
+    area.innerHTML = providers.map(p => `
+        <div class="provider">
+            <h3>${safe(p.business_name || "Business name not provided")}</h3>
+
+            <p><strong>Full Name:</strong> ${safe(p.full_name)}</p>
+            <p><strong>Email:</strong> ${safe(p.email)}</p>
+            <p><strong>Phone:</strong> ${safe(p.phone)}</p>
+            <p><strong>Category:</strong> ${safe(p.primary_category)}</p>
+            <p><strong>Location:</strong> ${safe(p.location)}</p>
+            <p><strong>Description:</strong> ${safe(p.description)}</p>
+
+            <p>
+                <strong>Status:</strong>
+                <span class="status">${safe(p.approval_status)}</span>
+            </p>
+
+            <p class="small">
+                Registered: ${safe(
+                    p.created_at
+                    ? new Date(p.created_at).toLocaleString()
+                    : "Not available"
+                )}
+            </p>
+
+            <button class="approve"
+                onclick="changeStatus('${safe(p.id)}','approved')">
+                Approve
+            </button>
+
+            <button class="reject"
+                onclick="changeStatus('${safe(p.id)}','rejected')">
+                Reject
+            </button>
+
+            <button class="pending"
+                onclick="changeStatus('${safe(p.id)}','pending')">
+                Set Pending
+            </button>
+        </div>
+    `).join("");
+}
+
+async function changeStatus(providerId, newStatus) {
+    const confirmed = confirm(
+        "Are you sure you want to change this provider's status to " +
+        newStatus + "?"
+    );
+
+    if (!confirmed) return;
+
+    showMessage("Updating application...");
+
+    const { data: authData } = await db.auth.getUser();
+
+    if (!authData.user || !(await checkOwner(authData.user))) {
+        showMessage("Owner authorization required.", true);
+        return;
+    }
+
+    const { error } = await db.rpc("set_provider_approval", {
+        p_provider_id: providerId,
+        p_new_status: newStatus
+    });
+
+    if (error) {
+        showMessage("Update failed: " + error.message, true);
+        return;
+    }
+
+    showMessage("Provider status updated successfully.");
+    await loadProviders();
+}
+
+async function ownerLogout() {
+    await db.auth.signOut();
+
+    document.getElementById("dashboard").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+
+    document.getElementById("password").value = "";
+    document.getElementById("loginMessage").textContent =
+        "You have signed out.";
+}
+
+async function restoreOwnerSession() {
+    const { data } = await db.auth.getSession();
+
+    if (!data.session) return;
+
+    const authorized = await checkOwner(data.session.user);
+
+    if (!authorized) {
+        await db.auth.signOut();
+        return;
+    }
+
+    document.getElementById("loginBox").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    document.getElementById("ownerEmail").textContent =
+        "Signed in as: " + data.session.user.email;
+
+    await loadProviders();
+}
+
+restoreOwnerSession();
+</script>
+
+</body>
+</html>
