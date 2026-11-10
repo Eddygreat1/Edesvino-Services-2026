@@ -133,14 +133,33 @@ h3 {
     line-height: 1.6;
 }
 
-.contact-btn {
+.contact-btn,
+.book-btn {
     display: inline-block;
-    background: #087443;
     color: white;
     padding: 11px 16px;
     border-radius: 6px;
     text-decoration: none;
     margin-top: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.contact-btn {
+    background: #087443;
+}
+
+.book-btn {
+    background: #d97706;
+    margin-left: 5px;
+}
+
+.contact-btn:hover {
+    background: #065c35;
+}
+
+.book-btn:hover {
+    background: #b45309;
 }
 
 .message {
@@ -260,6 +279,7 @@ async function loadCategories() {
     const allButton = document.createElement("button");
     allButton.className = "category-btn active";
     allButton.textContent = "All Services";
+
     allButton.onclick = function() {
         filterCategory("all", allButton);
     };
@@ -351,6 +371,7 @@ async function loadServices() {
 function displayServices() {
     const container = document.getElementById("services");
     const message = document.getElementById("serviceMessage");
+
     const search = document.getElementById("searchInput").value
         .toLowerCase()
         .trim();
@@ -420,6 +441,12 @@ function displayServices() {
             `;
         }
 
+        const bookingHTML = `
+            <a class="book-btn" href="booking.html">
+                Book This Service
+            </a>
+        `;
+
         card.innerHTML = `
             ${imageHTML}
 
@@ -439,6 +466,8 @@ function displayServices() {
             </div>
 
             ${contactHTML}
+
+            ${bookingHTML}
         `;
 
         container.appendChild(card);
