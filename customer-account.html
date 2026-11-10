@@ -313,13 +313,16 @@ document.getElementById("registerForm").addEventListener(
             email:email,
             password:password,
 
-            options:{
-                data:{
-                    full_name:fullName,
-                    phone:phone,
-                    account_type:"customer"
-                }
-            }
+            
+         options:{
+         emailRedirectTo:"https://eddygreat1.github.io/Edesvino-Services-2026/customer-account.html",
+         data:{
+        full_name:fullName,
+        phone:phone,
+        account_type:"customer"
+    }
+} 
+            
 
         });
 
