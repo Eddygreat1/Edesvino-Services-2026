@@ -9,27 +9,169 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f5f7fa;color:#222}
-header{background:#073b2a;color:white;text-align:center;padding:22px}
-nav{background:white;padding:14px;text-align:center;border-bottom:1px solid #ddd}
-nav a{color:#087443;text-decoration:none;font-weight:bold;margin:0 8px}
-.container{max-width:480px;margin:35px auto;padding:20px}
-.panel{background:white;padding:25px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.08)}
-h2{color:#073b2a;text-align:center}
-.tabs{display:flex;gap:10px;margin:20px 0}
-.tabs button{flex:1;padding:12px;border:1px solid #087443;background:white;color:#087443;border-radius:6px;font-weight:bold}
-.tabs button.active{background:#087443;color:white}
-label{display:block;margin:13px 0 6px;font-weight:bold}
-input{width:100%;padding:13px;border:1px solid #ccc;border-radius:6px;font-size:16px}
-.main-btn{display:block;width:100%;padding:14px;margin-top:20px;border:none;border-radius:6px;background:#087443;color:white;font-size:16px;font-weight:bold;cursor:pointer;text-align:center;text-decoration:none}
-.main-btn:disabled{opacity:.6}
-.message{display:none;padding:12px;margin-top:15px;border-radius:6px;line-height:1.5}
-.success{display:block;background:#e5f7ec;color:#176b35}
-.error{display:block;background:#fdeaea;color:#a12626}
-.account-box{display:none;text-align:center}
-.account-box p{line-height:1.7}
-.small-text{color:#666;font-size:13px;line-height:1.5}
-footer{background:#073b2a;color:white;text-align:center;padding:20px;margin-top:40px}
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f5f7fa;
+    color:#222
+}
+
+header{
+    background:#073b2a;
+    color:white;
+    text-align:center;
+    padding:22px
+}
+
+nav{
+    background:white;
+    padding:14px;
+    text-align:center;
+    border-bottom:1px solid #ddd
+}
+
+nav a{
+    color:#087443;
+    text-decoration:none;
+    font-weight:bold;
+    margin:0 8px
+}
+
+.container{
+    max-width:480px;
+    margin:35px auto;
+    padding:20px
+}
+
+.panel{
+    background:white;
+    padding:25px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08)
+}
+
+h2{
+    color:#073b2a;
+    text-align:center
+}
+
+.tabs{
+    display:flex;
+    gap:10px;
+    margin:20px 0
+}
+
+.tabs button{
+    flex:1;
+    padding:12px;
+    border:1px solid #087443;
+    background:white;
+    color:#087443;
+    border-radius:6px;
+    font-weight:bold
+}
+
+.tabs button.active{
+    background:#087443;
+    color:white
+}
+
+label{
+    display:block;
+    margin:13px 0 6px;
+    font-weight:bold
+}
+
+input{
+    width:100%;
+    padding:13px;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:16px
+}
+
+.main-btn{
+    display:block;
+    width:100%;
+    padding:14px;
+    margin-top:20px;
+    border:none;
+    border-radius:6px;
+    background:#087443;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none
+}
+
+.main-btn:disabled{
+    opacity:.6;
+    cursor:not-allowed
+}
+
+.resend-btn{
+    background:#e8f5ed;
+    color:#087443;
+    border:1px solid #087443
+}
+
+.message{
+    display:none;
+    padding:12px;
+    margin-top:15px;
+    border-radius:6px;
+    line-height:1.5;
+    overflow-wrap:anywhere
+}
+
+.success{
+    display:block;
+    background:#e5f7ec;
+    color:#176b35
+}
+
+.error{
+    display:block;
+    background:#fdeaea;
+    color:#a12626
+}
+
+.account-box{
+    display:none;
+    text-align:center
+}
+
+.account-box p{
+    line-height:1.7
+}
+
+.small-text{
+    color:#666;
+    font-size:13px;
+    line-height:1.5
+}
+
+.resend-section{
+    margin-top:28px;
+    padding-top:20px;
+    border-top:1px solid #ddd
+}
+
+.resend-section h3{
+    color:#073b2a;
+    text-align:center
+}
+
+footer{
+    background:#073b2a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    margin-top:40px
+}
 </style>
 </head>
 
@@ -47,16 +189,23 @@ footer{background:#073b2a;color:white;text-align:center;padding:20px;margin-top:
 </nav>
 
 <div class="container">
+
 <div class="panel">
 
 <div id="accountForms">
 
 <h2>Customer Account</h2>
-<p style="text-align:center">Create a customer account or sign in.</p>
+
+<p style="text-align:center">
+Create a customer account or sign in.
+</p>
 
 <div class="tabs">
-<button id="registerTab" class="active" onclick="showForm('register')">Register</button>
-<button id="loginTab" onclick="showForm('login')">Login</button>
+<button id="registerTab" class="active"
+onclick="showForm('register')">Register</button>
+
+<button id="loginTab"
+onclick="showForm('login')">Login</button>
 </div>
 
 <form id="registerForm">
@@ -71,9 +220,11 @@ footer{background:#073b2a;color:white;text-align:center;padding:20px;margin-top:
 <input type="email" id="registerEmail" required>
 
 <label>Password</label>
-<input type="password" id="registerPassword" minlength="6" required>
+<input type="password" id="registerPassword"
+minlength="6" required>
 
-<button type="submit" class="main-btn" id="registerButton">
+<button type="submit" class="main-btn"
+id="registerButton">
 Create Customer Account
 </button>
 
@@ -87,7 +238,8 @@ Create Customer Account
 <label>Password</label>
 <input type="password" id="loginPassword" required>
 
-<button type="submit" class="main-btn" id="loginButton">
+<button type="submit" class="main-btn"
+id="loginButton">
 Login to Your Account
 </button>
 
@@ -95,11 +247,45 @@ Login to Your Account
 
 <div id="message" class="message"></div>
 
+<!-- RESEND CONFIRMATION EMAIL -->
+
+<div class="resend-section">
+
+<h3>Email Confirmation</h3>
+
+<p class="small-text" style="text-align:center">
+Haven't received your confirmation email?
+Enter your registered email address below.
+</p>
+
+<form id="resendForm">
+
+<label>Email Address</label>
+
+<input type="email" id="resendEmail"
+placeholder="Enter your registered email"
+required>
+
+<button type="submit"
+class="main-btn resend-btn"
+id="resendButton">
+Resend Confirmation Email
+</button>
+
+</form>
+
+<div id="resendMessage" class="message"></div>
+
+</div>
+
 <p class="small-text">
-Customer accounts are separate from service-provider and owner access.
+Customer accounts are separate from service-provider
+and owner access.
 </p>
 
 </div>
+
+<!-- CUSTOMER ACCOUNT -->
 
 <div id="accountBox" class="account-box">
 
@@ -107,14 +293,18 @@ Customer accounts are separate from service-provider and owner access.
 
 <p>You are successfully signed in as a customer.</p>
 
-<p><strong>Email:</strong><br>
-<span id="accountEmail"></span></p>
+<p>
+<strong>Email:</strong><br>
+<span id="accountEmail"></span>
+</p>
 
 <a href="browse-services.html" class="main-btn">
 Browse Services
 </a>
 
-<button class="main-btn" onclick="signOut()" style="background:#a12626">
+<button class="main-btn"
+onclick="signOut()"
+style="background:#a12626">
 Sign Out
 </button>
 
@@ -131,9 +321,14 @@ Sign Out
 
 <script>
 
-const SUPABASE_URL = "https://dhsfvctmvgmzrnpgxznd.supabase.co";
+const SUPABASE_URL =
+"https://dhsfvctmvgmzrnpgxznd.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+const SUPABASE_KEY =
+"sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm";
+
+const REDIRECT_URL =
+"https://eddygreat1.github.io/Edesvino-Services-2026/customer-account.html";
 
 const db = window.supabase.createClient(
     SUPABASE_URL,
@@ -142,19 +337,41 @@ const db = window.supabase.createClient(
 
 let checkingAccount = false;
 
+
+// GENERAL MESSAGES
+
 function showMessage(text,type){
+
     const box=document.getElementById("message");
+
     box.textContent=text;
     box.className="message "+type;
+
+}
+
+function showResendMessage(text,type){
+
+    const box=document.getElementById("resendMessage");
+
+    box.textContent=text;
+    box.className="message "+type;
+
 }
 
 function showAccountMessage(text,type){
+
     const box=document.getElementById("accountMessage");
+
     box.textContent=text;
     box.className="message "+type;
+
 }
 
+
+// SWITCH FORMS
+
 function showForm(form){
+
     document.getElementById("registerForm").style.display =
         form==="register" ? "block" : "none";
 
@@ -170,28 +387,53 @@ function showForm(form){
     );
 
     document.getElementById("message").className="message";
+
 }
+
+
+// DISPLAY ACCOUNT FORMS
 
 function displayForms(){
+
     document.getElementById("accountForms").style.display="block";
+
     document.getElementById("accountBox").style.display="none";
+
 }
 
+
+// DISPLAY CUSTOMER ACCOUNT
+
 function displayCustomer(user){
+
     document.getElementById("accountForms").style.display="none";
+
     document.getElementById("accountBox").style.display="block";
-    document.getElementById("accountEmail").textContent=user.email||"";
+
+    document.getElementById("accountEmail").textContent=
+        user.email||"";
+
 }
+
+
+// CHECK CUSTOMER PERMISSIONS
 
 async function checkCustomerRole(user){
 
     if(!user){
-        return {allowed:false,reason:"Please sign in to continue."};
+
+        return {
+            allowed:false,
+            reason:"Please sign in to continue."
+        };
+
     }
 
     const role=user.user_metadata?.account_type;
 
-    // Check whether this account is an owner.
+
+    // CHECK OWNER ACCOUNT
+
     const {data:admin,error:adminError}=await db
         .from("platform_admins")
         .select("user_id")
@@ -199,20 +441,26 @@ async function checkCustomerRole(user){
         .maybeSingle();
 
     if(adminError){
+
         return {
             allowed:false,
             reason:"Unable to verify account permissions. Please try again."
         };
+
     }
 
     if(admin){
+
         return {
             allowed:false,
             reason:"This is an owner account. Please use the Owner Dashboard."
         };
+
     }
 
-    // Check whether this account has a provider profile.
+
+    // CHECK PROVIDER ACCOUNT
+
     const {data:provider,error:providerError}=await db
         .from("service_providers")
         .select("id")
@@ -220,38 +468,56 @@ async function checkCustomerRole(user){
         .maybeSingle();
 
     if(providerError){
+
         return {
             allowed:false,
             reason:"Unable to verify account permissions. Please try again."
         };
+
     }
 
     if(provider || role==="service_provider"){
+
         return {
             allowed:false,
             reason:"This is a service-provider account. Please use the Provider Dashboard."
         };
+
     }
 
-    // Only accounts explicitly registered as customers are allowed.
+
+    // CUSTOMER ROLE
+
     if(role!=="customer"){
+
         return {
             allowed:false,
-            reason:"This account is not registered as a customer. Please create a customer account or use the correct login page."
+            reason:"This account is not registered as a customer. Please use the correct account."
         };
+
     }
 
     return {allowed:true};
+
 }
+
+
+// REJECT UNAUTHORIZED ACCOUNTS
 
 async function rejectAccount(reason){
 
     await db.auth.signOut();
 
     displayForms();
+
     showForm("login");
+
     showMessage(reason,"error");
+
 }
+
+
+// VALIDATE CUSTOMER ACCOUNT
 
 async function validateAndDisplay(user){
 
@@ -264,8 +530,11 @@ async function validateAndDisplay(user){
         const result=await checkCustomerRole(user);
 
         if(!result.allowed){
+
             await rejectAccount(result.reason);
+
             return;
+
         }
 
         displayCustomer(user);
@@ -281,6 +550,7 @@ async function validateAndDisplay(user){
         checkingAccount=false;
 
     }
+
 }
 
 
@@ -294,16 +564,26 @@ document.getElementById("registerForm").addEventListener(
     const button=document.getElementById("registerButton");
 
     const fullName=document.getElementById("fullName").value.trim();
+
     const phone=document.getElementById("phone").value.trim();
+
     const email=document.getElementById("registerEmail").value.trim();
+
     const password=document.getElementById("registerPassword").value;
 
     if(password.length<6){
-        showMessage("Password must contain at least 6 characters.","error");
+
+        showMessage(
+            "Password must contain at least 6 characters.",
+            "error"
+        );
+
         return;
+
     }
 
     button.disabled=true;
+
     button.textContent="Creating Account...";
 
     try{
@@ -311,18 +591,24 @@ document.getElementById("registerForm").addEventListener(
         const {data,error}=await db.auth.signUp({
 
             email:email,
+
             password:password,
 
-            
-         options:{
-         emailRedirectTo:"https://eddygreat1.github.io/Edesvino-Services-2026/customer-account.html",
-         data:{
-        full_name:fullName,
-        phone:phone,
-        account_type:"customer"
-    }
-} 
-            
+            options:{
+
+                emailRedirectTo:REDIRECT_URL,
+
+                data:{
+
+                    full_name:fullName,
+
+                    phone:phone,
+
+                    account_type:"customer"
+
+                }
+
+            }
 
         });
 
@@ -334,8 +620,10 @@ document.getElementById("registerForm").addEventListener(
 
         }else{
 
+            document.getElementById("resendEmail").value=email;
+
             showMessage(
-                "Registration successful! Check your email and confirm your address. Then return here and log in.",
+                "Registration successful! Check your email and confirm your address. If you do not receive the email, use the Resend Confirmation Email section below.",
                 "success"
             );
 
@@ -348,7 +636,65 @@ document.getElementById("registerForm").addEventListener(
     }finally{
 
         button.disabled=false;
+
         button.textContent="Create Customer Account";
+
+    }
+
+});
+
+
+// RESEND CONFIRMATION EMAIL
+
+document.getElementById("resendForm").addEventListener(
+"submit",async function(event){
+
+    event.preventDefault();
+
+    const button=document.getElementById("resendButton");
+
+    const email=document.getElementById("resendEmail")
+        .value.trim();
+
+    button.disabled=true;
+
+    button.textContent="Sending Confirmation...";
+
+    try{
+
+        const {data,error}=await db.auth.resend({
+
+            type:"signup",
+
+            email:email,
+
+            options:{
+
+                emailRedirectTo:REDIRECT_URL
+
+            }
+
+        });
+
+        if(error)throw error;
+
+        showResendMessage(
+            "Confirmation email request submitted. Please check your Gmail Inbox, Spam and Promotions folders.",
+            "success"
+        );
+
+    }catch(error){
+
+        showResendMessage(
+            "Unable to resend confirmation email: "+error.message,
+            "error"
+        );
+
+    }finally{
+
+        button.disabled=false;
+
+        button.textContent="Resend Confirmation Email";
 
     }
 
@@ -365,16 +711,23 @@ document.getElementById("loginForm").addEventListener(
     const button=document.getElementById("loginButton");
 
     button.disabled=true;
+
     button.textContent="Checking Account...";
 
     try{
 
-        const email=document.getElementById("loginEmail").value.trim();
-        const password=document.getElementById("loginPassword").value;
+        const email=document.getElementById("loginEmail")
+            .value.trim();
+
+        const password=document.getElementById("loginPassword")
+            .value;
 
         const {data,error}=await db.auth.signInWithPassword({
+
             email:email,
+
             password:password
+
         });
 
         if(error)throw error;
@@ -388,6 +741,7 @@ document.getElementById("loginForm").addEventListener(
     }finally{
 
         button.disabled=false;
+
         button.textContent="Login to Your Account";
 
     }
@@ -402,13 +756,21 @@ async function signOut(){
     const {error}=await db.auth.signOut();
 
     if(error){
+
         showAccountMessage(error.message,"error");
+
         return;
+
     }
 
     displayForms();
+
     showForm("login");
-    showMessage("You have signed out successfully.","success");
+
+    showMessage(
+        "You have signed out successfully.",
+        "success"
+    );
 
 }
 
@@ -420,8 +782,11 @@ async function checkSession(){
     const {data,error}=await db.auth.getSession();
 
     if(error){
+
         displayForms();
+
         return;
+
     }
 
     if(data.session && data.session.user){
@@ -437,16 +802,20 @@ async function checkSession(){
 }
 
 
-// Do not automatically display an account just because a session exists.
-// Every account must pass the customer role check.
+// AUTHENTICATION EVENTS
 
 db.auth.onAuthStateChange((event,session)=>{
 
     if(event==="SIGNED_OUT"){
+
         displayForms();
+
     }
 
 });
+
+
+// INITIALIZE CUSTOMER ACCOUNT PAGE
 
 checkSession();
 
