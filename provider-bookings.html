@@ -89,6 +89,14 @@ button:disabled {
     margin: 15px 0;
 }
 
+.notification-card {
+    border-left: 5px solid #087443;
+}
+
+.notification-card.unread {
+    background: #effaf3;
+}
+
 footer {
     text-align: center;
     padding: 25px;
@@ -112,6 +120,17 @@ footer {
 
 <div class="container">
 
+    <h2>Notifications</h2>
+
+    <p>
+        New booking alerts sent to your provider account.
+        Notifications remain here even when you are offline.
+    </p>
+
+    <div id="notifications">
+        Loading notifications...
+    </div>
+
     <h2>Customer Booking Requests</h2>
 
     <p>View and manage bookings submitted for your services.</p>
@@ -123,8 +142,8 @@ footer {
     <div id="bookings"></div>
 
     <button id="refreshButton"
-    onclick="loadBookings()" style="display:none;">
-        Refresh Bookings
+    onclick="refreshAll()" style="display:none;">
+        Refresh Bookings and Notifications
     </button>
 
 </div>
@@ -148,6 +167,7 @@ const db = window.supabase.createClient(
 
 const message = document.getElementById("message");
 const bookingsContainer = document.getElementById("bookings");
+const notificationsContainer = document.getElementById("notifications");
 const refreshButton = document.getElementById("refreshButton");
 
 let currentUser = null;
@@ -190,6 +210,10 @@ async function checkProvider() {
         showMessage(
             "Please sign in with your approved provider account."
         );
+
+        notificationsContainer.textContent =
+            "Please sign in to view your notifications.";
+
         return;
     }
 
@@ -208,6 +232,9 @@ async function checkProvider() {
             "This account does not have a registered service-provider profile."
         );
 
+        notificationsContainer.textContent =
+            "Provider account not found.";
+
         return;
     }
 
@@ -217,12 +244,98 @@ async function checkProvider() {
             "Your provider application is not yet approved. You can manage bookings after approval."
         );
 
+        notificationsContainer.textContent =
+            "Notifications are available after provider approval.";
+
         return;
     }
 
     refreshButton.style.display = "inline-block";
 
+    await refreshAll();
+}
+
+async function refreshAll() {
+    await loadNotifications();
     await loadBookings();
+}
+
+async function loadNotifications() {
+
+    if (!currentUser) return;
+
+    notificationsContainer.innerHTML =
+        '<div class="message">Loading notifications...</div>';
+
+    const { data: notifications, error } = await db
+        .from("provider_notifications")
+        .select("id,title,message,booking_id,is_read,created_at")
+        .eq("provider_id", currentUser.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+    if (error) {
+
+        console.error("Notification loading error:", error);
+
+        notificationsContainer.innerHTML =
+            '<div class="message">Notifications could not be loaded right now. Your booking requests are still available below.</div>';
+
+        return;
+    }
+
+    if (!notifications || notifications.length === 0) {
+
+        notificationsContainer.innerHTML =
+            '<div class="message">No notifications yet. New customer booking alerts will appear here.</div>';
+
+        return;
+    }
+
+    notificationsContainer.innerHTML = "";
+
+    notifications.forEach(notification => {
+
+        const item = document.createElement("div");
+
+        item.className = "card notification-card";
+
+        if (!notification.is_read) {
+            item.classList.add("unread");
+        }
+
+        const unreadLabel = notification.is_read
+            ? "Read"
+            : "New";
+
+        item.innerHTML = `
+
+            <h3>${safeText(
+                notification.title || "Booking notification"
+            )}</h3>
+
+            <p>${safeText(notification.message)}</p>
+
+            <p>
+                <strong>Booking reference:</strong>
+                ${safeText(notification.booking_id)}
+            </p>
+
+            <p>
+                <strong>Status:</strong>
+                <span class="status">${unreadLabel}</span>
+            </p>
+
+            <p>
+                <small>
+                    ${formatDate(notification.created_at)}
+                </small>
+            </p>
+
+        `;
+
+        notificationsContainer.appendChild(item);
+    });
 }
 
 async function loadBookings() {
