@@ -19,6 +19,9 @@ input,select,textarea{width:100%;padding:13px;margin-top:7px;border:1px solid #c
 button{width:100%;padding:15px;margin-top:20px;background:#087b45;color:white;border:0;border-radius:7px;font-size:16px;font-weight:bold;cursor:pointer}
 button:disabled{opacity:.6}
 .secondary{background:#eef5f0;color:#087b45;border:1px solid #087b45}
+.password-row{display:flex;gap:8px;align-items:stretch;margin-top:7px}
+.password-row input{flex:1;min-width:0;margin-top:0}
+.password-toggle{width:auto;flex-shrink:0;margin-top:0;padding:0 15px;background:#eef5f0;color:#087b45;border:1px solid #087b45}
 .status{margin-top:15px;padding:12px;border-radius:6px;display:none;line-height:1.5}
 .success{display:block;background:#e3f8eb;color:#087b45}
 .error{display:block;background:#ffe8e8;color:#b00020}
@@ -55,7 +58,10 @@ footer{text-align:center;padding:25px;color:#666}
 <input id="email" type="email" required>
 
 <label>Password</label>
+<div class="password-row">
 <input id="password" type="password" minlength="8" required>
+<button type="button" class="password-toggle" onclick="togglePassword('password',this)">Show</button>
+</div>
 
 <label>Service Category</label>
 <select id="category" required>
@@ -96,7 +102,10 @@ footer{text-align:center;padding:25px;color:#666}
 <input id="loginEmail" type="email" required>
 
 <label>Password</label>
+<div class="password-row">
 <input id="loginPassword" type="password" required>
+<button type="button" class="password-toggle" onclick="togglePassword('loginPassword',this)">Show</button>
+</div>
 
 <button type="submit" id="loginButton">Sign In</button>
 
@@ -113,7 +122,11 @@ footer{text-align:center;padding:25px;color:#666}
 
 <form id="recoveryForm">
 <label>New Password</label>
+<div class="password-row">
 <input id="newPassword" type="password" minlength="8" required>
+<button type="button" class="password-toggle" onclick="togglePassword('newPassword',this)">Show</button>
+</div>
+
 <button type="submit" id="recoveryButton">Save New Password</button>
 </form>
 
@@ -133,11 +146,30 @@ const SUPABASE_KEY = 'sb_publishable_4ZDqpnq4q6gubdteRQCc5A_JX-OUwlm';
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+
+// SHOW OR HIDE PASSWORD
+
+function togglePassword(inputId,button){
+
+const input=document.getElementById(inputId);
+
+if(input.type==='password'){
+input.type='text';
+button.textContent='Hide';
+}else{
+input.type='password';
+button.textContent='Show';
+}
+
+}
+
+
 function showMessage(id,message,type){
 const box=document.getElementById(id);
 box.textContent=message;
 box.className='status '+type;
 }
+
 
 async function createProviderProfile(user){
 
