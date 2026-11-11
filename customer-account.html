@@ -91,6 +91,29 @@ input{
     font-size:16px
 }
 
+.password-wrap{
+    position:relative;
+    width:100%
+}
+
+.password-wrap input{
+    padding-right:85px
+}
+
+.password-toggle{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    border:0;
+    background:transparent;
+    color:#087443;
+    font-weight:bold;
+    font-size:13px;
+    padding:8px;
+    cursor:pointer
+}
+
 .main-btn{
     display:block;
     width:100%;
@@ -220,8 +243,15 @@ onclick="showForm('login')">Login</button>
 <input type="email" id="registerEmail" required>
 
 <label>Password</label>
+
+<div class="password-wrap">
 <input type="password" id="registerPassword"
 minlength="6" required>
+
+<button type="button" class="password-toggle"
+onclick="togglePassword('registerPassword',this)"
+aria-label="Show password">Show</button>
+</div>
 
 <button type="submit" class="main-btn"
 id="registerButton">
@@ -236,7 +266,14 @@ Create Customer Account
 <input type="email" id="loginEmail" required>
 
 <label>Password</label>
+
+<div class="password-wrap">
 <input type="password" id="loginPassword" required>
+
+<button type="button" class="password-toggle"
+onclick="togglePassword('loginPassword',this)"
+aria-label="Show password">Show</button>
+</div>
 
 <button type="submit" class="main-btn"
 id="loginButton">
@@ -246,8 +283,6 @@ Login to Your Account
 </form>
 
 <div id="message" class="message"></div>
-
-<!-- RESEND CONFIRMATION EMAIL -->
 
 <div class="resend-section">
 
@@ -284,8 +319,6 @@ and owner access.
 </p>
 
 </div>
-
-<!-- CUSTOMER ACCOUNT -->
 
 <div id="accountBox" class="account-box">
 
@@ -336,6 +369,26 @@ const db = window.supabase.createClient(
 );
 
 let checkingAccount = false;
+
+
+// SHOW OR HIDE PASSWORD
+
+function togglePassword(inputId,button){
+
+    const input=document.getElementById(inputId);
+
+    const showing=input.type==="password";
+
+    input.type=showing ? "text" : "password";
+
+    button.textContent=showing ? "Hide" : "Show";
+
+    button.setAttribute(
+        "aria-label",
+        showing ? "Hide password" : "Show password"
+    );
+
+}
 
 
 // GENERAL MESSAGES
@@ -431,9 +484,6 @@ async function checkCustomerRole(user){
 
     const role=user.user_metadata?.account_type;
 
-
-    // CHECK OWNER ACCOUNT
-
     const {data:admin,error:adminError}=await db
         .from("platform_admins")
         .select("user_id")
@@ -458,9 +508,6 @@ async function checkCustomerRole(user){
 
     }
 
-
-    // CHECK PROVIDER ACCOUNT
-
     const {data:provider,error:providerError}=await db
         .from("service_providers")
         .select("id")
@@ -484,9 +531,6 @@ async function checkCustomerRole(user){
         };
 
     }
-
-
-    // CUSTOMER ROLE
 
     if(role!=="customer"){
 
